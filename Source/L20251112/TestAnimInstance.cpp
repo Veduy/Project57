@@ -4,6 +4,7 @@
 #include "TestAnimInstance.h"
 #include "TestCharacter.h"
 #include "Gameframework/CharacterMovementComponent.h"
+#include "KismetAnimationLibrary.h"
 
 void UTestAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -14,6 +15,7 @@ void UTestAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		GroundSpeed = Character->GetCharacterMovement()->Velocity.Size2D();
 		bSprint = Character->bSprint;
+		Direction = UKismetAnimationLibrary::CalculateDirection(Character->GetCharacterMovement()->Velocity, Character->GetActorRotation());
 	}
 }
 

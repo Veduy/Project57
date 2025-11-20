@@ -19,7 +19,7 @@ public:
 
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float GroundSpeed = 0.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
@@ -27,4 +27,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_SkeletonNotify();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	float Direction;
 };
