@@ -54,4 +54,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Character)
 	uint8 bSprint : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bLeftLean : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bRightLean : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bAiming : 1;
 };
