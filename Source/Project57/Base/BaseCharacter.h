@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
+
+class UInputAction;
+
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
 {
@@ -14,7 +17,6 @@ enum class EWeaponState : uint8
 	Rifle = 20 UMETA(DisplayName = "Rifle"),
 	Launcher = 30 UMETA(DisplayName = "Launcher")
 };
-
 
 UCLASS()
 class PROJECT57_API ABaseCharacter : public ACharacter
@@ -36,32 +38,48 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UCameraComponent> Camera;
 
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UChildActorComponent> Weapon;
+
 public:
-	FORCEINLINE class USpringArmComponent* GetSpringArm() const 
-	{
-		return SpringArm;
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input)
+	TObjectPtr<UInputAction> IA_Reload;
 
-	FORCEINLINE class UCameraComponent* GetCameraComponent() const
-	{
-		return Camera;
-	}
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input)
+	TObjectPtr<UInputAction> IA_Fire;
+	
 	UFUNCTION(BlueprintCallable)
 	void Move(float Forward, float Right);
 
 	UFUNCTION(BlueprintCallable)
 	void Look(float Pitch, float Yaw);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Character)
+	UFUNCTION(BlueprintCallable)
+	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	void ReloadWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void DoFire();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	float CurrentHP = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	float MaxHP = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bSprint : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
@@ -73,7 +91,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bAiming : 1;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	EWeaponState WeaponState = EWeaponState::Unarmed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TObjectPtr<UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TObjectPtr<UAnimMontage> DeathMontage;
 };

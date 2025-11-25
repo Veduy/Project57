@@ -16,5 +16,8 @@ class PROJECT57_API ABasePC : public APlayerController
 
 public:
 	ABasePC();
-	
+
+public:
+	UFUNCTION()
+	void FireAim();
 };

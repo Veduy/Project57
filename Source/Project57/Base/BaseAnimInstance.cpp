@@ -41,10 +41,7 @@ void UBaseAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		WeaponState = Character->WeaponState;
 
 		bIsCrouched = Character->bIsCrouched;
-	}
-}
 
-void UBaseAnimInstance::AnimNotify_SkeletonNotify()
-{
-	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_SkeletonNotify"));
+		bIsFalling = Character->GetMovementComponent()->IsFalling();
+	}
 }

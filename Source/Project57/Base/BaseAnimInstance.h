@@ -14,8 +14,8 @@ UCLASS()
 class PROJECT57_API UBaseAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-public:
 
+public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 
@@ -26,12 +26,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bSprint : 1;
 
-	UFUNCTION()
-	void AnimNotify_SkeletonNotify();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float Direction;
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float AimYaw;
@@ -56,4 +52,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bIsCrouched : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bIsFalling : 1;
 };
