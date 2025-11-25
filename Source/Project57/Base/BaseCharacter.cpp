@@ -10,14 +10,15 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
+
 #include "EnhancedInputComponent.h"
 #include "Engine/DamageEvents.h"
+
 #include "TimerManager.h"
 
 #include "../Weapon/WeaponBase.h"
+
 #include "BasePC.h"
-#include "../Weapon/DamageTypeBase.h"
 
 
 
@@ -51,6 +52,7 @@ void ABaseCharacter::BeginPlay()
 	if (ChildWeapon)
 	{
 		ChildWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ChildWeapon->SocketName);
+		ChildWeapon->SetOwner(this);
 	}
 }
 
@@ -69,26 +71,22 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		Input->BindAction(IA_Reload, ETriggerEvent::Triggered, this, &ABaseCharacter::Reload);
-		Input->BindAction(IA_Fire, ETriggerEvent::Triggered, this, &ABaseCharacter::DoFire);
+		Input->BindAction(IA_Fire, ETriggerEvent::Started, this, &ABaseCharacter::StartFire);
+		Input->BindAction(IA_Fire, ETriggerEvent::Completed, this, &ABaseCharacter::StopFire);
 	}
 }
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	FVector_NetQuantizeNormal HitDirection;
+
+	if (CurrentHP <= 0)
+	{
+		return DamageAmount;
+	}
+
 	if (HitMontage)
 	{
-		FName HitMonatageSection[8] =
-		{
-			"Back_Med_01",
-			"Front_Hvy_01",
-			"Front_Lgt_01",
-			"Front_Lgt_02",
-			"Front_Lgt_03",
-			"Front_Lgt_04",
-			"Front_Med_01",
-			"Front_Med_02"
-		};
-
 		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
 	}
 
@@ -98,6 +96,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		if (Event)
 		{
 			CurrentHP -= DamageAmount;
+			HitDirection = Event->ShotDirection;
 			//UE_LOG(LogTemp, Warning, TEXT("Point Damage %f %s"), DamageAmount, *(Event->HitInfo.BoneName.ToString()));
 		}
 	}
@@ -107,7 +106,10 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		if (Event)
 		{
 			CurrentHP -= DamageAmount;
-			//UE_LOG(LogTemp, Warning, TEXT("Radial Damage %f %s"), DamageAmount, *Event->DamageTypeClass->GetName());
+
+			// 오리진에서 직접 계산 필요
+			//HitDirection = Event->Origin;
+			
 		}
 	}
 	else if (DamageEvent.IsOfType(FDamageEvent::ClassID))
@@ -116,31 +118,20 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		//UE_LOG(LogTemp, Warning, TEXT("Damage %f"), DamageAmount);
 	}
 
-
 	if (CurrentHP <= 0)
 	{
 		if (DeathMontage)
 		{
-			FName DeathMonatageSection[6] =
-			{
-				"Back_01",
-				"Front_01",
-				"Front_02",
-				"Front_03",
-				"Left_01"
-				"Right_01"
-			};
-
+			// HitDriection 하고 Forward, Left, Right, Back, 내적해서 값이 가장 작은 방향으로 선정.	
 			PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
 
-			// 애니메이션 시간 구해서 넣기.
-			FTimerHandle Timer;
-			GetWorld()->GetTimerManager().SetTimer(Timer, 
-				[this]()
-				{
-					GetMesh()->SetSimulatePhysics(true);
-				}, 
-				1.f, false, 1.f);
+			//FTimerHandle Timer;
+			//GetWorld()->GetTimerManager().SetTimer(Timer, 
+			//	[this]()
+			//	{
+			//		GetMesh()->SetSimulatePhysics(true);
+			//	}, 
+			//	1.f, false, 1.f);
 		};
 	}
 
@@ -187,61 +178,33 @@ void ABaseCharacter::ReloadWeapon()
 
 void ABaseCharacter::DoFire()
 {
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		int32 SizeX;
-		int32 SizeY;
-		PC->GetViewportSize(SizeX, SizeY);
-		int32 CenterX = SizeX * 0.5f;
-		int32 CenterY = SizeY * 0.5f;
-
-		FVector WorldLocation;
-		FVector WorldDirection;
-
-		PC->DeprojectScreenPositionToWorld(CenterX, CenterY, WorldLocation, WorldDirection);
-
-		FVector CameraLocation;
-		FRotator CameraRotation;
-		PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
-
-		FVector Start = CameraLocation;
-		FVector End = CameraLocation + WorldDirection * 100000;
-
-		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
-		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
-		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
-
-		TArray<AActor*> ActorsToIgnore;
-		FHitResult HitResult;
-
-		bool bResult = UKismetSystemLibrary::LineTraceSingleForObjects(
-			GetWorld(),
-			Start,
-			End,
-			ObjectTypes,
-			true,
-			ActorsToIgnore,
-			EDrawDebugTrace::ForDuration,
-			HitResult,
-			true,
-			FLinearColor::Red,
-			FLinearColor::Green,
-			0.5f);
-
-		if (bResult)
-		{
-			UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), 10,-HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
-		}
-	
-	}
-
 	if (AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor()))
 	{
 		ChildWeapon->Fire();
+
 		if (ABasePC* PC = Cast<ABasePC>(GetController()))
 		{
 			PC->FireAim();
 		}
 	}
+}
+
+void ABaseCharacter::StartFire()
+{
+	bIsFire = true;
+	DoFire();
+}
+
+void ABaseCharacter::StopFire()
+{
+	bIsFire = false;
+	if (AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor()))
+	{
+		ChildWeapon->StopFire();
+	}
+}
+
+void ABaseCharacter::DoHitReact()
+{
+
 }

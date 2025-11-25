@@ -51,12 +51,6 @@ protected:
 	TObjectPtr<class UChildActorComponent> Weapon;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input)
-	TObjectPtr<UInputAction> IA_Reload;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input)
-	TObjectPtr<UInputAction> IA_Fire;
-	
 	UFUNCTION(BlueprintCallable)
 	void Move(float Forward, float Right);
 
@@ -68,11 +62,26 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ReloadWeapon();
-
+		
 	UFUNCTION(BlueprintCallable)
 	void DoFire();
 
+	UFUNCTION(BlueprintCallable)
+	void StartFire();
+
+	UFUNCTION(BlueprintCallable)
+	void StopFire();
+
+	UFUNCTION()
+	void DoHitReact();
+
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<UInputAction> IA_Reload;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<UInputAction> IA_Fire;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float CurrentHP = 100;
 
@@ -92,6 +101,9 @@ public:
 	uint8 bAiming : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bIsFire : 1 = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	EWeaponState WeaponState = EWeaponState::Unarmed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -99,4 +111,28 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UAnimMontage> DeathMontage;
+
+
+private:
+	FName HitMonatageSection[8] =
+	{
+		"Back_Med_01",
+		"Front_Hvy_01",
+		"Front_Lgt_01",
+		"Front_Lgt_02",
+		"Front_Lgt_03",
+		"Front_Lgt_04",
+		"Front_Med_01",
+		"Front_Med_02"
+	};
+
+	FName DeathMonatageSection[6] =
+	{
+		"Back_01",
+		"Front_01",
+		"Front_02",
+		"Front_03",
+		"Left_01"
+		"Right_01"
+	};
 };
