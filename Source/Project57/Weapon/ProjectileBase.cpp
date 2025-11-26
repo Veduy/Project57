@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AProjectileBase::AProjectileBase()
@@ -20,15 +21,31 @@ AProjectileBase::AProjectileBase()
 	Mesh->SetupAttachment(Collision);
 
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
-	Movement->MaxSpeed = 1000.f;
-	Movement->InitialSpeed = 1000.f;
+	Movement->MaxSpeed = 5000.f;
+	Movement->InitialSpeed = 5000.f;
+	Movement->ProjectileGravityScale = 0.1f;
 }
 
 // Called when the game starts or when spawned
 void AProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	OnActorBeginOverlap.AddDynamic(this, &AProjectileBase::ActorBeginOverlap);
 	
+}
+
+void AProjectileBase::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	//UGameplayStatics::ApplyPointDamage(OtherActor, 10, -HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
+
+	////¹üÀ§ °ø°Ý, ÆøÅº
+	//UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
+	//	ActorsToIgnore,
+	//	this,
+	//	PC,
+	//	true
+	//);
 }
 
 // Called every frame
@@ -37,4 +54,5 @@ void AProjectileBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
 

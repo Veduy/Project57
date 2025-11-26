@@ -2,6 +2,7 @@
 
 
 #include "AnimNotify_Ragdoll.h"
+#include "../Base/BaseCharacter.h"
 
 FString UAnimNotify_Ragdoll::GetNotifyName_Implementation() const
 {
@@ -10,6 +11,8 @@ FString UAnimNotify_Ragdoll::GetNotifyName_Implementation() const
 
 void UAnimNotify_Ragdoll::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	MeshComp->SetSimulatePhysics(true);
-	MeshComp->SetCollisionProfileName(FName("Ragdoll"), true);
+	if (ABaseCharacter* Character = Cast<ABaseCharacter>(MeshComp->GetOwner()))
+	{
+		Character->DoDeathEnd();
+	}
 }

@@ -10,9 +10,13 @@
 #include "GameFramework/PlayerController.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "../Base/BaseCharacter.h"
+#include "../Base/BasePC.h"
 #include "../Weapon/DamageTypeBase.h"
+#include "../Weapon/ProjectileBase.h"
 
 // Sets default values
 AWeaponBase::AWeaponBase()
@@ -28,7 +32,7 @@ AWeaponBase::AWeaponBase()
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -57,10 +61,12 @@ void AWeaponBase::Fire()
 	{
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
 	}
-	
+
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (APlayerController* PC = Cast<APlayerController>(Character->GetController()))
+	if (ABasePC* PC = Cast<ABasePC>(Character->GetController()))
 	{
+		PC->FireAim();
+
 		int32 SizeX;
 		int32 SizeY;
 		PC->GetViewportSize(SizeX, SizeY);
@@ -104,8 +110,31 @@ void AWeaponBase::Fire()
 		if (bResult)
 		{
 			UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), 10, -HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
+
+			//범위 공격, 폭탄
+			UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
+				ActorsToIgnore,
+				this,
+				PC,
+				true);
 		}
 
+		FVector SpawnLocation = Mesh->GetSocketLocation(FName("Muzzle"));
+		FVector TargetLocation = bResult ? HitResult.ImpactPoint : End;
+		FVector BulletDirection = TargetLocation - SpawnLocation;
+
+		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, TargetLocation + BulletDirection +
+			UKismetMathLibrary::RandomUnitVector() * 5.f);
+
+		FTransform SpawnTransform(AimRotation, SpawnLocation, FVector::OneVector);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		GetWorld()->SpawnActor<AProjectileBase>(ProjectileClass, SpawnTransform, SpawnParams);
+
+
+		Character->AddControllerPitchInput(FMath::FRandRange(-0.2, 0)); // 에임 분산
+		Character->AddControllerYawInput(FMath::FRandRange(-0.2, 0.2)); // 에임 분산
 	}
 
 	if(CurBulletCount > 0)

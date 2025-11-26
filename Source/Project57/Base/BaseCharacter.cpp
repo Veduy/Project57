@@ -19,6 +19,7 @@
 #include "../Weapon/WeaponBase.h"
 
 #include "BasePC.h"
+#include "../InteractActor.h"
 
 
 
@@ -39,6 +40,8 @@ ABaseCharacter::ABaseCharacter()
 
 	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponActor"));
 	Weapon->SetupAttachment(GetMesh());
+
+
 }
 
 // Called when the game starts or when spawned
@@ -46,14 +49,7 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//OnTakeAnyDamage.AddDynamic(this, &ABaseCharacter::TakeAnyDamage);
-
-	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
-	if (ChildWeapon)
-	{
-		ChildWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ChildWeapon->SocketName);
-		ChildWeapon->SetOwner(this);
-	}
+	OnActorBeginOverlap.AddDynamic(this, &ABaseCharacter::ActorBeginOverlap);
 }
 
 // Called every frame
@@ -73,6 +69,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(IA_Reload, ETriggerEvent::Triggered, this, &ABaseCharacter::Reload);
 		Input->BindAction(IA_Fire, ETriggerEvent::Started, this, &ABaseCharacter::StartFire);
 		Input->BindAction(IA_Fire, ETriggerEvent::Completed, this, &ABaseCharacter::StopFire);
+
+		Input->BindAction(IA_IronSight, ETriggerEvent::Started, this, &ABaseCharacter::StartIronSight);
+		Input->BindAction(IA_IronSight, ETriggerEvent::Completed, this, &ABaseCharacter::StopIronSight);
 	}
 }
 
@@ -85,10 +84,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		return DamageAmount;
 	}
 
-	if (HitMontage)
-	{
-		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
-	}
+	DoHitReact();
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -97,7 +93,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		{
 			CurrentHP -= DamageAmount;
 			HitDirection = Event->ShotDirection;
-			//UE_LOG(LogTemp, Warning, TEXT("Point Damage %f %s"), DamageAmount, *(Event->HitInfo.BoneName.ToString()));
+			UE_LOG(LogTemp, Warning, TEXT("Point Damage %f %s"), DamageAmount, *(Event->HitInfo.BoneName.ToString()));
 		}
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
@@ -115,28 +111,37 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	else if (DamageEvent.IsOfType(FDamageEvent::ClassID))
 	{
 		CurrentHP -= DamageAmount;
-		//UE_LOG(LogTemp, Warning, TEXT("Damage %f"), DamageAmount);
+		UE_LOG(LogTemp, Warning, TEXT("Damage %f"), DamageAmount);
 	}
 
 	if (CurrentHP <= 0)
 	{
-		if (DeathMontage)
-		{
-			// HitDriection 하고 Forward, Left, Right, Back, 내적해서 값이 가장 작은 방향으로 선정.	
-			PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
-
-			//FTimerHandle Timer;
-			//GetWorld()->GetTimerManager().SetTimer(Timer, 
-			//	[this]()
-			//	{
-			//		GetMesh()->SetSimulatePhysics(true);
-			//	}, 
-			//	1.f, false, 1.f);
-		};
+		DoDeath();
 	}
 
 
 	return DamageAmount;
+}
+
+void ABaseCharacter::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	if (AInteractActor* Item = Cast<AInteractActor>(OtherActor))
+	{
+
+		switch (Item->Info.ItemType)
+		{
+		case EItemType::None:
+		case EItemType::Use:
+			UseItem(Item);
+			break;
+		case EItemType::Eat:
+			EatItem(Item);
+			break;
+		case EItemType::Equip:
+			EquipItem(Item);
+			break;
+		}
+	}
 }
 
 void ABaseCharacter::Move(float Forward, float Right)
@@ -181,11 +186,6 @@ void ABaseCharacter::DoFire()
 	if (AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor()))
 	{
 		ChildWeapon->Fire();
-
-		if (ABasePC* PC = Cast<ABasePC>(GetController()))
-		{
-			PC->FireAim();
-		}
 	}
 }
 
@@ -204,7 +204,64 @@ void ABaseCharacter::StopFire()
 	}
 }
 
+void ABaseCharacter::StartIronSight(const FInputActionValue& Value)
+{
+	bIsIronSight = true;
+}
+
+void ABaseCharacter::StopIronSight(const FInputActionValue& Value)
+{
+	bIsIronSight = false;
+}
+
+void ABaseCharacter::DoDeath()
+{
+	if (DeathMontage)
+	{
+		// HitDriection 하고 Forward, Left, Right, Back, 내적해서 값이 가장 작은 방향으로 선정.	
+		PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
+
+	};
+}
+
+void ABaseCharacter::DoDeathEnd()
+{
+	GetController()->SetActorEnableCollision(false);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
+}
+
 void ABaseCharacter::DoHitReact()
+{
+	if (HitMontage)
+	{
+		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
+	}
+}
+
+void ABaseCharacter::SwitchWeapon()
+{
+
+}
+
+void ABaseCharacter::EquipItem(AInteractActor* PickedupItem)
+{
+	Weapon->SetChildActorClass(PickedupItem->Info.ItemTemplate);
+	WeaponState = PickedupItem->Info.WeaponType;
+
+	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
+	if (ChildWeapon)
+	{
+		ChildWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ChildWeapon->SocketName);
+		ChildWeapon->SetOwner(this);
+	}
+}
+
+void ABaseCharacter::UseItem(AInteractActor* PickedupItem)
+{
+}
+
+void ABaseCharacter::EatItem(AInteractActor* PickedupItem)
 {
 
 }

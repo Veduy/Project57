@@ -8,6 +8,7 @@
 
 
 class UInputAction;
+class AInteractActor;
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
@@ -40,7 +41,11 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-protected:
+	//FActorBeginOverlapSignature, AActor, OnActorBeginOverlap, AActor*, OverlappedActor, AActor*, OtherActor );
+
+	UFUNCTION()
+	void ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
 
@@ -72,8 +77,27 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopFire();
 
+	UFUNCTION(BlueprintCallable)
+	void StartIronSight(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void StopIronSight(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void DoDeath();
+
+	UFUNCTION(BlueprintCallable)
+	void DoDeathEnd();
+
 	UFUNCTION()
 	void DoHitReact();
+
+	UFUNCTION(BlueprintCallable)
+	void SwitchWeapon();
+
+	void EquipItem(AInteractActor* PickedupItem);
+	void UseItem(AInteractActor* PickedupItem);
+	void EatItem(AInteractActor* PickedupItem);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -81,6 +105,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> IA_Fire;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_IronSight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float CurrentHP = 100;
@@ -104,6 +131,9 @@ public:
 	uint8 bIsFire : 1 = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bIsIronSight : 1 = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	EWeaponState WeaponState = EWeaponState::Unarmed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -111,7 +141,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UAnimMontage> DeathMontage;
-
 
 private:
 	FName HitMonatageSection[8] =
@@ -129,7 +158,7 @@ private:
 	FName DeathMonatageSection[6] =
 	{
 		"Back_01",
-		"Front_01",
+		"Front_01",	
 		"Front_02",
 		"Front_03",
 		"Left_01"

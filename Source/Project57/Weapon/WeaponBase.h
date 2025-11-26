@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TimerManager.h"
+#include "../ItemBase.h"
 #include "WeaponBase.generated.h"
 
 
@@ -13,7 +14,7 @@ class USkeletalMeshComponent;
 
 
 UCLASS()
-class PROJECT57_API AWeaponBase : public AActor
+class PROJECT57_API AWeaponBase : public AItemBase
 {
 	GENERATED_BODY()
 	
@@ -45,6 +46,9 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	TSubclassOf<AProjectileBase> ProjectileClass;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
+	FName Name;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	FName SocketName = TEXT("");
