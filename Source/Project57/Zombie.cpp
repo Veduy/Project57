@@ -23,19 +23,6 @@ void AZombie::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	TargetPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
-}
-
-// Called every frame
-void AZombie::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	FVector Direction = TargetPawn->GetActorLocation() - GetActorLocation();
-	AddMovementInput(Direction, 1);
-
-	FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPawn->GetActorLocation());
-	SetActorRotation(Rotation);
 }
 
 float AZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
