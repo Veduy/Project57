@@ -40,8 +40,6 @@ ABaseCharacter::ABaseCharacter()
 
 	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponActor"));
 	Weapon->SetupAttachment(GetMesh());
-
-
 }
 
 // Called when the game starts or when spawned
@@ -77,8 +75,6 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	FVector_NetQuantizeNormal HitDirection;
-
 	if (CurrentHP <= 0)
 	{
 		return DamageAmount;
@@ -92,8 +88,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		if (Event)
 		{
 			CurrentHP -= DamageAmount;
-			HitDirection = Event->ShotDirection;
-			UE_LOG(LogTemp, Warning, TEXT("Point Damage %f %s"), DamageAmount, *(Event->HitInfo.BoneName.ToString()));
+			SpawnHitEffect(Event->HitInfo);
 		}
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
@@ -101,11 +96,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		FRadialDamageEvent* Event = (FRadialDamageEvent*)(&DamageEvent);
 		if (Event)
 		{
-			CurrentHP -= DamageAmount;
-
-			// 오리진에서 직접 계산 필요
-			//HitDirection = Event->Origin;
-			
+			CurrentHP -= DamageAmount;			
 		}
 	}
 	else if (DamageEvent.IsOfType(FDamageEvent::ClassID))
@@ -141,6 +132,19 @@ void ABaseCharacter::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherAct
 			EquipItem(Item);
 			break;
 		}
+	}
+}
+
+void ABaseCharacter::SpawnHitEffect(const FHitResult& Hit)
+{
+	if (BloodEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			BloodEffect,
+			Hit.ImpactPoint,
+			Hit.ImpactNormal.Rotation(),
+			FVector(3.f,3.f,3.f));
 	}
 }
 
@@ -218,9 +222,7 @@ void ABaseCharacter::DoDeath()
 {
 	if (DeathMontage)
 	{
-		// HitDriection 하고 Forward, Left, Right, Back, 내적해서 값이 가장 작은 방향으로 선정.	
 		PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
-
 	};
 }
 
@@ -237,11 +239,6 @@ void ABaseCharacter::DoHitReact()
 	{
 		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
 	}
-}
-
-void ABaseCharacter::SwitchWeapon()
-{
-
 }
 
 void ABaseCharacter::EquipItem(AInteractActor* PickedupItem)

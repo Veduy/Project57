@@ -45,6 +45,10 @@ public:
 
 	UFUNCTION()
 	void ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SpawnHitEffect(const FHitResult& Hit);
+
 public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
@@ -92,9 +96,6 @@ public:
 	UFUNCTION()
 	void DoHitReact();
 
-	UFUNCTION(BlueprintCallable)
-	void SwitchWeapon();
-
 	void EquipItem(AInteractActor* PickedupItem);
 	void UseItem(AInteractActor* PickedupItem);
 	void EatItem(AInteractActor* PickedupItem);
@@ -141,6 +142,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UAnimMontage> DeathMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TObjectPtr<UParticleSystem> BloodEffect;
 
 private:
 	FName HitMonatageSection[8] =

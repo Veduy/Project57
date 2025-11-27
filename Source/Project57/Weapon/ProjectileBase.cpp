@@ -5,7 +5,9 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "DamageTypeBase.h"
 
 // Sets default values
 AProjectileBase::AProjectileBase()
@@ -16,6 +18,7 @@ AProjectileBase::AProjectileBase()
 	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collision"));
 	SetRootComponent(Collision);
 	Collision->SetBoxExtent(FVector(10.f, 10.f, 10.f));
+	Collision->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Collision);
@@ -31,21 +34,46 @@ void AProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnActorBeginOverlap.AddDynamic(this, &AProjectileBase::ActorBeginOverlap);
+	SetLifeSpan(5.f);
+
+	Collision->OnComponentHit.AddDynamic(this, &AProjectileBase::ComponentHit);
 	
 }
 
-void AProjectileBase::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
+	FVector NormalImpulse, const FHitResult& Hit)
 {
-	//UGameplayStatics::ApplyPointDamage(OtherActor, 10, -HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
 
-	////¹üÀ§ °ø°Ý, ÆøÅº
-	//UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
-	//	ActorsToIgnore,
-	//	this,
-	//	PC,
-	//	true
-	//);
+	SpawnHitEffect(Hit);
+
+	if (APawn* Pawn = Cast<APawn>(GetOwner()->GetOwner()))
+	{
+		APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
+
+		UGameplayStatics::ApplyPointDamage(OtherActor, 10, -HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
+
+		//¹üÀ§ °ø°Ý, ÆøÅº
+		//UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
+		//	ActorsToIgnore,
+		//	this,
+		//	PC,
+		//	true);
+	}
+}
+
+void AProjectileBase::SpawnHitEffect(FHitResult Hit)
+{
+	if (Decal)
+	{
+		UDecalComponent* MadeDecal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(),
+			Decal,
+			FVector(5, 5, 5),
+			Hit.ImpactPoint,
+			Hit.ImpactNormal.Rotation(),
+			5.f);
+
+		MadeDecal->SetFadeScreenSize(0.005f);
+	}
 }
 
 // Called every frame

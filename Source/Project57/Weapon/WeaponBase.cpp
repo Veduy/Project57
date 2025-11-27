@@ -83,7 +83,7 @@ void AWeaponBase::Fire()
 		PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
 		FVector Start = CameraLocation;
-		FVector End = CameraLocation + WorldDirection * 100000;
+		FVector End = CameraLocation + WorldDirection * 1000;
 
 		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
@@ -107,18 +107,6 @@ void AWeaponBase::Fire()
 			FLinearColor::Green,
 			0.5f);
 
-		if (bResult)
-		{
-			UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), 10, -HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
-
-			//범위 공격, 폭탄
-			UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
-				ActorsToIgnore,
-				this,
-				PC,
-				true);
-		}
-
 		FVector SpawnLocation = Mesh->GetSocketLocation(FName("Muzzle"));
 		FVector TargetLocation = bResult ? HitResult.ImpactPoint : End;
 		FVector BulletDirection = TargetLocation - SpawnLocation;
@@ -126,15 +114,17 @@ void AWeaponBase::Fire()
 		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, TargetLocation + BulletDirection +
 			UKismetMathLibrary::RandomUnitVector() * 5.f);
 
-		FTransform SpawnTransform(AimRotation, SpawnLocation, FVector::OneVector);
+		FireProjectile(FTransform(AimRotation, SpawnLocation, FVector::OneVector), HitResult);
+		
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash,
+				SpawnLocation, AimRotation, FVector(3.f,3.f,3.f));
+		}
 
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		GetWorld()->SpawnActor<AProjectileBase>(ProjectileClass, SpawnTransform, SpawnParams);
-
-
-		Character->AddControllerPitchInput(FMath::FRandRange(-0.2, 0)); // 에임 분산
-		Character->AddControllerYawInput(FMath::FRandRange(-0.2, 0.2)); // 에임 분산
+		// Recoil
+		Character->AddControllerPitchInput(FMath::FRandRange(-0.5, 0)); 
+		Character->AddControllerYawInput(FMath::FRandRange(-0.5, 0.5)); 
 	}
 
 	if(CurBulletCount > 0)
@@ -152,8 +142,12 @@ void AWeaponBase::StopFire()
 	GetWorld()->GetTimerManager().ClearTimer(FireTimer);
 }
 
-void AWeaponBase::FireProjectile()
+void AWeaponBase::FireProjectile(FTransform SpawnTrasnform, FHitResult InHitResult)
 {
-
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AProjectileBase* Projectile = GetWorld()->SpawnActor<AProjectileBase>(ProjectileClass, SpawnTrasnform, SpawnParams);
+	Projectile->HitResult = InHitResult;
 }
 

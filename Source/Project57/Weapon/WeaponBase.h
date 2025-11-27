@@ -13,6 +13,7 @@ class AProjectileBase;
 class USkeletalMeshComponent;
 
 
+
 UCLASS()
 class PROJECT57_API AWeaponBase : public AItemBase
 {
@@ -38,11 +39,12 @@ public:
 	void StopFire();
 
 	UFUNCTION(BlueprintCallable)
-	void FireProjectile();
+	void FireProjectile(FTransform SpawnTrasnform, FHitResult InHitResult);
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<USkeletalMeshComponent> Mesh;
+
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	TSubclassOf<AProjectileBase> ProjectileClass;
@@ -61,6 +63,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<USoundBase> FireSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Data")
+	TObjectPtr<UParticleSystem> MuzzleFlash;   
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	int32 MaxBulletCount = 100;
