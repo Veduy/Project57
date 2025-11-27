@@ -4,6 +4,10 @@
 #include "Zombie.h"
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
+
 
 // Sets default values
 AZombie::AZombie()
@@ -11,6 +15,7 @@ AZombie::AZombie()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
 // Called when the game starts or when spawned
@@ -18,6 +23,7 @@ void AZombie::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	TargetPawn = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn();
 }
 
 // Called every frame
@@ -25,13 +31,11 @@ void AZombie::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
+	FVector Direction = TargetPawn->GetActorLocation() - GetActorLocation();
+	AddMovementInput(Direction, 1);
 
-// Called to bind functionality to input
-void AZombie::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPawn->GetActorLocation());
+	SetActorRotation(Rotation);
 }
 
 float AZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -40,8 +44,6 @@ float AZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	{
 		return DamageAmount;
 	}
-
-	DoHitReact();
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -75,24 +77,12 @@ float AZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	return DamageAmount;
 }
 
-void AZombie::DoHitReact()
-{
-	if (HitMontage)
-	{
-		PlayAnimMontage(HitMontage, 1.f);
-	}
-}
-
 void AZombie::DoDeath()
 {
 	if (DeathMontage)
 	{
 		PlayAnimMontage(DeathMontage, 1.f);
 	};	
-
-	GetController()->SetActorEnableCollision(false);
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
 }
 
 void AZombie::SpawnHitEffect(const FHitResult& Hit)

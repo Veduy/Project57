@@ -6,6 +6,14 @@
 #include "GameFramework/Character.h"
 #include "Zombie.generated.h"
 
+UENUM(BlueprintType)
+enum class EAIState : uint8
+{
+	Normal		= 0 UMETA(DisplayName = "Normal"),
+	Chase		= 1 UMETA(DisplayName = "Chase"),
+	Battle		= 2 UMETA(DisplayName = "Battle"),
+	Death		= 3 UMETA(DisplayName = "Death")
+};
 
 class UParticleSystem;
 
@@ -23,14 +31,9 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
-	UFUNCTION()
-	void DoHitReact();
-
 	UFUNCTION()
 	void DoDeath();
 
@@ -38,11 +41,11 @@ public:
 	void SpawnHitEffect(const FHitResult& Hit);
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	TObjectPtr<UAnimMontage> DeathMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	EAIState State;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	TObjectPtr<UAnimMontage> HitMontage;
+	TObjectPtr<UAnimMontage> DeathMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UParticleSystem> BloodEffect;
@@ -52,4 +55,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float MaxHP = 100;
+
+	APawn* TargetPawn;
 };

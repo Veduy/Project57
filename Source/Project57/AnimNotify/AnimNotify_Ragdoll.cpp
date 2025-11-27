@@ -15,4 +15,10 @@ void UAnimNotify_Ragdoll::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	{
 		Character->DoDeathEnd();
 	}
+	else if(ACharacter* Characer = Cast<ACharacter>(MeshComp->GetOwner()))
+	{
+		Characer->GetController()->SetActorEnableCollision(false);
+		Characer->GetMesh()->SetSimulatePhysics(true);
+		Characer->GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
+	}
 }
