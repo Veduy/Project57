@@ -3,7 +3,7 @@
 
 #include "ZombieAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "../Zombie.h"
+#include "Zombie.h"
 
 void UZombieAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {

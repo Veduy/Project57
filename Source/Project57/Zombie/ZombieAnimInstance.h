@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "../Zombie.h"
+#include "Zombie.h"
 #include "ZombieAnimInstance.generated.h"
 
 /**

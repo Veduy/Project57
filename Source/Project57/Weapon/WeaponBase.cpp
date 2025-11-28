@@ -123,6 +123,7 @@ void AWeaponBase::Fire()
 		}
 
 		// Recoil
+		//FMath::FInterpTo()
 		Character->AddControllerPitchInput(FMath::FRandRange(-0.5, 0)); 
 		Character->AddControllerYawInput(FMath::FRandRange(-0.5, 0.5)); 
 	}

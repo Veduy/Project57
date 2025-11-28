@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "BaseCharacter.generated.h"
 
 
 class UInputAction;
 class AInteractActor;
+class UAIPerceptionStimuliSourceComponent;
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
@@ -20,7 +22,7 @@ enum class EWeaponState : uint8
 };
 
 UCLASS()
-class PROJECT57_API ABaseCharacter : public ACharacter
+class PROJECT57_API ABaseCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -49,6 +51,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void SpawnHitEffect(const FHitResult& Hit);
 
+	virtual void SetGenericTeamId(const FGenericTeamId& InTeamID) override;
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
 public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
@@ -58,6 +64,9 @@ public:
 
 	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class UChildActorComponent> Weapon;
+
+	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAIPerceptionStimuliSourceComponent> PerceptionSource;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -146,6 +155,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UParticleSystem> BloodEffect;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Team")
+	FGenericTeamId TeamID;
 private:
 	FName HitMonatageSection[8] =
 	{

@@ -50,7 +50,7 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 	{
 		APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
 
-		UGameplayStatics::ApplyPointDamage(OtherActor, 10, -HitResult.ImpactNormal, HitResult, PC, this, UDamageTypeBase::StaticClass());
+		UGameplayStatics::ApplyPointDamage(OtherActor, 10, -Hit.ImpactNormal, Hit, PC, this, UDamageTypeBase::StaticClass());
 
 		//¹üÀ§ °ø°Ý, ÆøÅº
 		//UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
@@ -59,6 +59,9 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 		//	PC,
 		//	true);
 	}
+
+	//Destroy();
+	
 }
 
 void AProjectileBase::SpawnHitEffect(FHitResult Hit)
@@ -72,7 +75,7 @@ void AProjectileBase::SpawnHitEffect(FHitResult Hit)
 			Hit.ImpactNormal.Rotation(),
 			5.f);
 
-		MadeDecal->SetFadeScreenSize(0.005f);
+		MadeDecal->SetFadeScreenSize(0.f);
 	}
 }
 

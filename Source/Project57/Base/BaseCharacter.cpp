@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 #include "EnhancedInputComponent.h"
 #include "Engine/DamageEvents.h"
@@ -20,7 +21,6 @@
 
 #include "BasePC.h"
 #include "../InteractActor.h"
-
 
 
 // Sets default values
@@ -40,6 +40,8 @@ ABaseCharacter::ABaseCharacter()
 
 	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponActor"));
 	Weapon->SetupAttachment(GetMesh());
+
+	PerceptionSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionSource"));
 }
 
 // Called when the game starts or when spawned
@@ -148,12 +150,21 @@ void ABaseCharacter::SpawnHitEffect(const FHitResult& Hit)
 	}
 }
 
+void ABaseCharacter::SetGenericTeamId(const FGenericTeamId& InTeamID)
+{
+	TeamID = InTeamID;
+}
+
+FGenericTeamId ABaseCharacter::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
 void ABaseCharacter::Move(float Forward, float Right)
 {
 	const FRotator CameraRotation =  GetController()->GetControlRotation();
 	const FRotator YawRotation = FRotator(0, CameraRotation.Yaw, 0);
 	const FRotator YawRollRotation = FRotator(0, CameraRotation.Yaw, CameraRotation.Roll);
-
 
 	const FVector ForwardVector = UKismetMathLibrary::GetForwardVector(YawRotation);
 	AddMovementInput(ForwardVector, Forward);

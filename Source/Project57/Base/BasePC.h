@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BasePC.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRecoilSignature, float, Vertical, float, Horizontal);
 /**
  * 
  */
@@ -17,7 +18,15 @@ class PROJECT57_API ABasePC : public APlayerController
 public:
 	ABasePC();
 
+	virtual void Tick(float DeltaTime) override;
+
+	FRecoilSignature OnRecoil;
+
 public:
 	UFUNCTION()
 	void FireAim();
+
+public:
+	float VerticalRecoil;
+	float HorizontalRecoil;
 };
