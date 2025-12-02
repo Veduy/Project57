@@ -51,9 +51,8 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 		APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
 
 		UGameplayStatics::ApplyPointDamage(OtherActor, 10, -Hit.ImpactNormal, Hit, PC, this, UDamageTypeBase::StaticClass());
-
 		//¹üÀ§ °ø°Ý, ÆøÅº
-		//UGameplayStatics::ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
+		//UGameplayStatics::wda ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
 		//	ActorsToIgnore,
 		//	this,
 		//	PC,
