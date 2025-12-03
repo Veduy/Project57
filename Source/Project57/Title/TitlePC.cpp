@@ -12,7 +12,7 @@ void ATitlePC::BeginPlay()
 	FSoftClassPath TitleWidgetClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/MyProject/Blueprints/Title/WBP_Title.WBP_Title_C'"));
 	UClass* WidgetClass = TitleWidgetClass.TryLoadClass<UTitleWidget>();
 
-	if (WidgetClass)
+	if (WidgetClass && IsLocalController())
 	{
 		TitleWidget = CreateWidget<UTitleWidget>(this, WidgetClass);
 		if (TitleWidget)

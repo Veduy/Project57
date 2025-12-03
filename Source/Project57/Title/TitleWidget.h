@@ -28,6 +28,8 @@ public:
 	UFUNCTION()
 	void Connect();
 
+	UFUNCTION()
+	void SaveData();
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta=(WidgetBind))
 	TObjectPtr<UButton> StartServerButton;
