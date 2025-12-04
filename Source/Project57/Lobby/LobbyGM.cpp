@@ -3,7 +3,9 @@
 
 #include "LobbyGM.h"
 
+#include "../Network/NetworkUtil.h"
 #include "LobbyGS.h"
+
 
 void ALobbyGM::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
@@ -20,6 +22,14 @@ APlayerController* ALobbyGM::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, co
 void ALobbyGM::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+	NET_LOG(TEXT("PostLogin"));
+
+	ALobbyGS* GS = GetGameState<ALobbyGS>();
+	if (GS)
+	{
+		GS->ConnectionCount++;
+		GS->OnRep_ConnectionCount();
+	}
 }
 
 void ALobbyGM::BeginPlay()
@@ -37,6 +47,14 @@ void ALobbyGM::BeginPlay()
 			1.f,
 			true,
 			0.f);
+
+	//ALobbyGS* GS = GetGameState<ALobbyGS>();
+	//if (GS)
+	//{
+	//	NET_LOG(TEXT("BeginPlay"));
+	//	GS->OnRep_ConnectionCount();
+	//	GS->ConnectionChanged.Broadcast(GS->ConnectionCount);
+	//}
 }
 
 void ALobbyGM::StartPlay()

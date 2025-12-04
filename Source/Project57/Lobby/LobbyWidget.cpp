@@ -29,7 +29,12 @@ void ULobbyWidget::NativeOnInitialized()
 	if (GS)
 	{
 		GS->LeftTimeChanged.AddDynamic(this, &ULobbyWidget::UpdateLeftTime);
+		GS->ConnectionChanged.AddDynamic(this, &ULobbyWidget::UpdateConnectionCount);
+
+		
+		GS->ConnectionChanged.Broadcast(GS->ConnectionCount);
 	}
+	
 }
 
 void ULobbyWidget::Start()
@@ -51,5 +56,14 @@ void ULobbyWidget::UpdateLeftTime(int32 InLeftTime)
 	{
 		FString Message = FString::Printf(TEXT("%d 초 남음"), InLeftTime);
 		LeftTime->SetText(FText::FromString(Message));
+	}
+}
+
+void ULobbyWidget::UpdateConnectionCount(int32 InCount)
+{
+	if (ConnectionCount)
+	{
+		FString Message = FString::Printf(TEXT("%d 플레이어 대기중"), InCount);
+		ConnectionCount->SetText(FText::FromString(Message));
 	}
 }

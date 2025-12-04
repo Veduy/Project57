@@ -8,6 +8,8 @@
 #include "LobbyPC.h"
 #include "LobbyWidget.h"
 
+#include "../Network/NetworkUtil.h"
+
 void ALobbyGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -18,11 +20,11 @@ void ALobbyGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 void ALobbyGS::OnRep_LeftTime()
 {
-	//ALobbyPC* PC = Cast<ALobbyPC>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	//
-	//if (PC && PC->LobbyWidgetObject)
-	//{
-	//	PC->LobbyWidgetObject->UpdateLeftTime(LeftTime);
-	//}
 	LeftTimeChanged.Broadcast(LeftTime);
+}
+
+void ALobbyGS::OnRep_ConnectionCount()
+{
+	NET_LOG(TEXT("OnRep_ConnectionCount()"));
+	ConnectionChanged.Broadcast(ConnectionCount);
 }

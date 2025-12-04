@@ -37,6 +37,9 @@ public:
 	UFUNCTION()
 	void UpdateLeftTime(int32 InLeftTime);
 
+	UFUNCTION()
+	void UpdateConnectionCount(int32 InCount);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UButton> StartButton;
