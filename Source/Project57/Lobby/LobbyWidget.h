@@ -67,4 +67,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UDataTable> TextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 };

@@ -15,11 +15,12 @@
 #include "../Title/DataGameInstanceSubsystem.h"
 #include "../Network/NetworkUtil.h"
 
+
 void ULobbyWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	bIsFocusable = true;
+	SetIsFocusable(true);
 
 	if (StartButton)
 	{
@@ -131,6 +132,14 @@ void ULobbyWidget::AddMessage(const FText& InMessage)
 			NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedGeometry().GetLocalSize().X);
 			//NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedWidget().Get()->GetDesiredSize().X);
 			NewMessage->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
+
+
+			/** Test */
+			NewMessage->SetToolTipText(FText::FromString(FString::Printf(TEXT("This is ToolTipText"))));
+			
+			//NewMessage->SetToolTip();
+			
+			/** End Test */
 
 			ChatScrollBox->AddChild(NewMessage);
 			NewMessage->SetText(InMessage);
