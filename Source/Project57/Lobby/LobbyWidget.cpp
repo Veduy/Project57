@@ -67,10 +67,14 @@ void ULobbyWidget::ProcessOnCommit(const FText& Text, ETextCommit::Type CommitMe
 			{
 				UDataGameInstanceSubsystem* MySubsystem = GI->GetSubsystem<UDataGameInstanceSubsystem>();
 
-				FString Temp = FString::Printf(TEXT("%s:%s"), *MySubsystem->UserId, *Text.ToString());
+				FString UserID = "<RichText.UserID>" + MySubsystem->UserId + "</>";
+				FString Temp = FString::Printf(TEXT("%s: %s"), *UserID, *Text.ToString());
 
+				if (Text.IsEmpty())
+				{
+					break;
+				}
 				PC->ServerSendMessage(FText::FromString(Temp));
-
 				ChatInput->SetText(FText());
 			}
 		}

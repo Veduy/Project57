@@ -20,6 +20,7 @@ void ATitlePC::BeginPlay()
 			TitleWidget->AddToViewport();
 		}
 
-		SetInputMode(FInputModeGameAndUI());
+		bShowMouseCursor = true;
+		SetInputMode(FInputModeUIOnly());
 	}
 }
