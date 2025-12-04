@@ -9,25 +9,29 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "LobbyGM.h"
 #include "LobbyGS.h"
 #include "LobbyPC.h"
 #include "../Title/DataGameInstanceSubsystem.h"
 #include "../Network/NetworkUtil.h"
-//#include "Textb"
 
 void ULobbyWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
+	bIsFocusable = true;
+
 	if (StartButton)
 	{
 		StartButton->OnClicked.AddDynamic(this, &ULobbyWidget::Start);
+		StartButton->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	if (ChatInput)
 	{
 		ChatInput->OnTextCommitted.AddDynamic(this, &ULobbyWidget::ProcessOnCommit);
 		ChatInput->OnTextChanged.AddDynamic(this, &ULobbyWidget::ProcessOnChanged);
+		ChatInput->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	ALobbyGS* GS = Cast<ALobbyGS>(UGameplayStatics::GetGameState(GetWorld()));
@@ -42,7 +46,12 @@ void ULobbyWidget::NativeOnInitialized()
 
 void ULobbyWidget::Start()
 {
-	GetWorld()->ServerTravel(TEXT("InGame"));
+	ALobbyGM* GM = Cast<ALobbyGM>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GM)
+	{
+		StartButton->SetVisibility(ESlateVisibility::Hidden);
+		GM->StartGame();
+	}
 }
 
 void ULobbyWidget::ProcessOnCommit(const FText& Text, ETextCommit::Type CommitMethod)
@@ -65,13 +74,17 @@ void ULobbyWidget::ProcessOnCommit(const FText& Text, ETextCommit::Type CommitMe
 				ChatInput->SetText(FText());
 			}
 		}
-
-
 		break;
 	case ETextCommit::OnCleared:
 		if (ALobbyPC* PC = Cast<ALobbyPC>(GetOwningPlayer()))
 		{
-			ChatInput->SetUserFocus(PC);
+			// 채팅 연속으로 치게
+			//ChatInput->SetUserFocus(PC);
+
+			// 치고나서 사라지게
+			ChatInput->SetVisibility(ESlateVisibility::Hidden);		
+
+			SetFocus();
 		}
 		break;
 	default:
@@ -105,22 +118,41 @@ void ULobbyWidget::AddMessage(const FText& InMessage)
 {
 	if (ChatScrollBox)
 	{
-		//UTextBlock* NewMessage = NewObject<UTextBlock>(ChatScrollBox);
 		URichTextBlock* NewMessage = NewObject<URichTextBlock>(ChatScrollBox);
 
 		if (NewMessage)
 		{
-			NewMessage->SetText(InMessage);
-
 			NewMessage->SetTextStyleSet(TextStyle);
 			NewMessage->SetAutoWrapText(true);
-			NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedWidget().Get()->GetDesiredSize().X);
+			NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedGeometry().GetLocalSize().X);
+			//NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedWidget().Get()->GetDesiredSize().X);
 			NewMessage->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
 
 			ChatScrollBox->AddChild(NewMessage);
+			NewMessage->SetText(InMessage);
 
 			// 밑으로 스크롤 해줌.
 			ChatScrollBox->ScrollToEnd();
+		}
+	}
+}
+
+void ULobbyWidget::ShowStartButton()
+{
+	if (StartButton)
+	{
+		StartButton->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void ULobbyWidget::ShowChatInputBox()
+{
+	if (ChatInput)
+	{
+		if (ALobbyPC* PC = Cast<ALobbyPC>(GetOwningPlayer()))
+		{
+			ChatInput->SetVisibility(ESlateVisibility::Visible);
+			ChatInput->SetUserFocus(PC);
 		}
 	}
 }

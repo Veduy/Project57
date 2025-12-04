@@ -43,6 +43,12 @@ public:
 	UFUNCTION()
 	void AddMessage(const FText& InMessage);
 
+	UFUNCTION()
+	void ShowStartButton();
+
+	UFUNCTION()
+	void ShowChatInputBox();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UButton> StartButton;

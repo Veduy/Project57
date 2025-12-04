@@ -19,5 +19,7 @@ void ATitlePC::BeginPlay()
 		{
 			TitleWidget->AddToViewport();
 		}
+
+		SetInputMode(FInputModeGameAndUI());
 	}
 }

@@ -22,9 +22,18 @@ void ALobbyPC::BeginPlay()
 	{
 		LobbyWidgetObject = CreateWidget<ULobbyWidget>(this, LobbyWidgetClass);
 		LobbyWidgetObject->AddToViewport();
+
+		if (HasAuthority())
+		{
+			LobbyWidgetObject->ShowStartButton();
+		}
+
+		bShowMouseCursor = true;
+		SetInputMode(FInputModeGameAndUI());
+
+		InputComponent->BindAction(FName("PressEnter"), IE_Pressed, this, &ALobbyPC::OnShowChatInputBox);
+		UE_LOG(LogTemp, Warning, TEXT("Input Binding"));
 	}
-
-
 }
 
 void ALobbyPC::Tick(float DeltaSeconds)
@@ -56,5 +65,33 @@ void ALobbyPC::ClientSendMessage_Implementation(const FText& Message)
 	if (LobbyWidgetObject)
 	{
 		LobbyWidgetObject->AddMessage(Message);
+	}
+}
+
+void ALobbyPC::ClientShowLoadingScreen_Implementation()
+{
+	if (LoadingWidgetClass)
+	{
+		if (IsLocalController())
+		{
+			UUserWidget* LoadingWidget = CreateWidget<UUserWidget>(this, LoadingWidgetClass);
+			if (LoadingWidget)
+			{
+				NET_LOG("Add to Viewport");
+				LoadingWidget->AddToViewport(1);
+			}
+		}
+	}
+	else
+	{
+		NET_LOG("LoadingWidgetClass is Empty");
+	}
+}
+
+void ALobbyPC::OnShowChatInputBox()
+{
+	if (LobbyWidgetObject)
+	{
+		LobbyWidgetObject->ShowChatInputBox();
 	}
 }

@@ -32,10 +32,20 @@ public:
 	void ClientSendMessage(const FText& Message); // 언리얼 헤더툴이 자동 생성해줌.
 	void ClientSendMessage_Implementation(const FText& Message);
 
+	UFUNCTION(Client, Reliable)
+	void ClientShowLoadingScreen();
+	void ClientShowLoadingScreen_Implementation();
+
+	UFUNCTION()
+	void OnShowChatInputBox();
+
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<ULobbyWidget> LobbyWidgetObject;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TSubclassOf<ULobbyWidget> LobbyWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TSubclassOf<UUserWidget> LoadingWidgetClass;
 };

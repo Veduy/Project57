@@ -18,7 +18,10 @@ class PROJECT57_API ABasePC : public APlayerController
 public:
 	ABasePC();
 
+	virtual void BeginPlay() override;
+
 	virtual void Tick(float DeltaTime) override;
+
 
 	FRecoilSignature OnRecoil;
 

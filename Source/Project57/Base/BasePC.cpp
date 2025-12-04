@@ -8,9 +8,14 @@ ABasePC::ABasePC()
 {
 }
 
+void ABasePC::BeginPlay()
+{
+	bShowMouseCursor = false;
+	SetInputMode(FInputModeGameOnly());
+}
+
 void ABasePC::Tick(float DeltaTime)
 {
-	//AddYawInput()
 
 }
 
