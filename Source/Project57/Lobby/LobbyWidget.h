@@ -40,6 +40,9 @@ public:
 	UFUNCTION()
 	void UpdateConnectionCount(int32 InCount);
 
+	UFUNCTION()
+	void AddMessage(const FText& InMessage);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UButton> StartButton;
@@ -48,7 +51,7 @@ public:
 	TObjectPtr<UEditableTextBox> ChatInput;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
-	TObjectPtr<UEditableTextBox> ChatScrollBox;
+	TObjectPtr<UScrollBox> ChatScrollBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UTextBlock> ConnectionCount;
@@ -56,4 +59,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UTextBlock> LeftTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
+	TObjectPtr<UDataTable> TextStyle;
 };

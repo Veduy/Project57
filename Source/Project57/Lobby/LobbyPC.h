@@ -21,6 +21,17 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSendMessage(const FText& Message);
+	void ServerSendMessage_Implementation(const FText& Message);
+	bool ServerSendMessage_Validate(const FText& Message);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSendMessage(const FText& Message); // 언리얼 헤더툴이 자동 생성해줌.
+	void ClientSendMessage_Implementation(const FText& Message);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<ULobbyWidget> LobbyWidgetObject;

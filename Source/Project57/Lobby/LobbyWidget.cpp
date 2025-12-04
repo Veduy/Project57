@@ -4,11 +4,16 @@
 #include "LobbyWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/EditableTextBox.h"
+#include "Components/RichTextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
 #include "LobbyGS.h"
+#include "LobbyPC.h"
+#include "../Title/DataGameInstanceSubsystem.h"
+#include "../Network/NetworkUtil.h"
+//#include "Textb"
 
 void ULobbyWidget::NativeOnInitialized()
 {
@@ -33,7 +38,6 @@ void ULobbyWidget::NativeOnInitialized()
 
 		GS->ConnectionChanged.Broadcast(GS->ConnectionCount);
 	}
-	
 }
 
 void ULobbyWidget::Start()
@@ -43,6 +47,36 @@ void ULobbyWidget::Start()
 
 void ULobbyWidget::ProcessOnCommit(const FText& Text, ETextCommit::Type CommitMethod)
 {
+	switch (CommitMethod)
+	{
+	case ETextCommit::OnEnter:
+		NET_LOG("Pressed Enter");
+		if (ALobbyPC* PC = Cast<ALobbyPC>(GetOwningPlayer()))
+		{
+			UGameInstance* GI = UGameplayStatics::GetGameInstance(GetWorld());
+			if (GI)
+			{
+				UDataGameInstanceSubsystem* MySubsystem = GI->GetSubsystem<UDataGameInstanceSubsystem>();
+
+				FString Temp = FString::Printf(TEXT("%s:%s"), *MySubsystem->UserId, *Text.ToString());
+
+				PC->ServerSendMessage(FText::FromString(Temp));
+
+				ChatInput->SetText(FText());
+			}
+		}
+
+
+		break;
+	case ETextCommit::OnCleared:
+		if (ALobbyPC* PC = Cast<ALobbyPC>(GetOwningPlayer()))
+		{
+			ChatInput->SetUserFocus(PC);
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void ULobbyWidget::ProcessOnChanged(const FText& Text)
@@ -64,5 +98,29 @@ void ULobbyWidget::UpdateConnectionCount(int32 InCount)
 	{
 		FString Message = FString::Printf(TEXT("%d 플레이어 대기중"), InCount);
 		ConnectionCount->SetText(FText::FromString(Message));
+	}
+}
+
+void ULobbyWidget::AddMessage(const FText& InMessage)
+{
+	if (ChatScrollBox)
+	{
+		//UTextBlock* NewMessage = NewObject<UTextBlock>(ChatScrollBox);
+		URichTextBlock* NewMessage = NewObject<URichTextBlock>(ChatScrollBox);
+
+		if (NewMessage)
+		{
+			NewMessage->SetText(InMessage);
+
+			NewMessage->SetTextStyleSet(TextStyle);
+			NewMessage->SetAutoWrapText(true);
+			NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedWidget().Get()->GetDesiredSize().X);
+			NewMessage->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
+
+			ChatScrollBox->AddChild(NewMessage);
+
+			// 밑으로 스크롤 해줌.
+			ChatScrollBox->ScrollToEnd();
+		}
 	}
 }

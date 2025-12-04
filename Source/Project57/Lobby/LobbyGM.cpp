@@ -37,6 +37,13 @@ void ALobbyGM::PostLogin(APlayerController* NewPlayer)
 			}
 		}
 
+		/*for (auto Controllers : PlayerControllers)
+		{
+			if (IsValid(Controllers))
+			{
+
+			}
+		}*/
 		GS->ConnectionCount = PlayerControllers.Num();
 		GS->OnRep_ConnectionCount();
 	}
