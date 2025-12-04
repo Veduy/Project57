@@ -5,7 +5,7 @@
 
 #include "../Network/NetworkUtil.h"
 #include "LobbyGS.h"
-
+#include "UObject/UObjectGlobals.h"
 
 void ALobbyGM::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
@@ -27,7 +27,17 @@ void ALobbyGM::PostLogin(APlayerController* NewPlayer)
 	ALobbyGS* GS = GetGameState<ALobbyGS>();
 	if (GS)
 	{
-		GS->ConnectionCount++;
+		TArray<APlayerController*> PlayerControllers;
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			APlayerController* PC = Iterator->Get();
+			if (PC)
+			{
+				PlayerControllers.Add(PC);
+			}
+		}
+
+		GS->ConnectionCount = PlayerControllers.Num();
 		GS->OnRep_ConnectionCount();
 	}
 }
@@ -47,14 +57,6 @@ void ALobbyGM::BeginPlay()
 			1.f,
 			true,
 			0.f);
-
-	//ALobbyGS* GS = GetGameState<ALobbyGS>();
-	//if (GS)
-	//{
-	//	NET_LOG(TEXT("BeginPlay"));
-	//	GS->OnRep_ConnectionCount();
-	//	GS->ConnectionChanged.Broadcast(GS->ConnectionCount);
-	//}
 }
 
 void ALobbyGM::StartPlay()

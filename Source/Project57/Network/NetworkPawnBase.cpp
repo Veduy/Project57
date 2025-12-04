@@ -44,7 +44,6 @@ void ANetworkPawnBase::BeginPlay()
 	{
 		NET_LOG(TEXT("RemoteRole::ROLE_SimulatedProxy"));
 	}
-	
 }
 
 // Called every frame
@@ -63,8 +62,6 @@ void ANetworkPawnBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void ANetworkPawnBase::PostNetReceiveRole()
 {
-	NET_LOG(TEXT("Begin"));
-
 	switch (GetLocalRole())
 	{
 	case ROLE_None:
@@ -104,21 +101,15 @@ void ANetworkPawnBase::PostNetReceiveRole()
 	default:
 		break;
 	}
-
-	NET_LOG(TEXT("End"));
 }
 
 void ANetworkPawnBase::PostNetInit()
 {
-	NET_LOG(TEXT("Begin"));
 	Super::PostNetInit();
-	NET_LOG(TEXT("End"));
 }
 
 void ANetworkPawnBase::PossessedBy(AController* NewController)
 {
-	NET_LOG(TEXT("Begin"));
-
 	AActor* OwnerActor = GetOwner();
 	if (OwnerActor)
 	{
@@ -142,8 +133,6 @@ void ANetworkPawnBase::PossessedBy(AController* NewController)
 	{
 		NET_LOG(TEXT("No Owner"));
 	}
-
-	NET_LOG(TEXT("End"));
 }
 
 void ANetworkPawnBase::OnRep_Owner()

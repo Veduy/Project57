@@ -31,7 +31,6 @@ void ULobbyWidget::NativeOnInitialized()
 		GS->LeftTimeChanged.AddDynamic(this, &ULobbyWidget::UpdateLeftTime);
 		GS->ConnectionChanged.AddDynamic(this, &ULobbyWidget::UpdateConnectionCount);
 
-		
 		GS->ConnectionChanged.Broadcast(GS->ConnectionCount);
 	}
 	

@@ -7,12 +7,13 @@
 #include "Components/EditableTextBox.h"
 #include "Kismet/GameplayStatics.h"
 #include "DataGameInstanceSubsystem.h"
+#include "../Network/NetworkUtil.h"
 
 void UTitleWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//meta=(WidgetBind)
+	//meta=(WidgetBind)로 대체 가능
 	ServerIP = Cast<UEditableTextBox>(GetWidgetFromName(TEXT("ServerIP")));
 
 	StartServerButton->OnClicked.AddDynamic(this, &UTitleWidget::StartServer);
@@ -38,6 +39,9 @@ void UTitleWidget::SaveData()
 	{
 		UDataGameInstanceSubsystem* MySubsystem = GI->GetSubsystem<UDataGameInstanceSubsystem>();
 		MySubsystem->UserId = UserID->GetText().ToString();
+		UE_LOG(LogTemp, Warning, TEXT("UserID: %s"), *UserID->GetText().ToString());
+
 		MySubsystem->Password = Password->GetText().ToString();
+		UE_LOG(LogTemp, Warning, TEXT("UserID: %s"), *Password->GetText().ToString());
 	}
 }
