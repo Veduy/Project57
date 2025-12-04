@@ -15,11 +15,13 @@
 #include "../Title/DataGameInstanceSubsystem.h"
 #include "../Network/NetworkUtil.h"
 
+#include "ItemDecorator.h"
+
 void ULobbyWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	bIsFocusable = true;
+	SetIsFocusable(true);
 
 	if (StartButton)
 	{
@@ -82,9 +84,6 @@ void ULobbyWidget::ProcessOnCommit(const FText& Text, ETextCommit::Type CommitMe
 	case ETextCommit::OnCleared:
 		if (ALobbyPC* PC = Cast<ALobbyPC>(GetOwningPlayer()))
 		{
-			// 채팅 연속으로 치게
-			//ChatInput->SetUserFocus(PC);
-
 			// 치고나서 사라지게
 			ChatInput->SetVisibility(ESlateVisibility::Hidden);		
 
@@ -129,13 +128,19 @@ void ULobbyWidget::AddMessage(const FText& InMessage)
 			NewMessage->SetTextStyleSet(TextStyle);
 			NewMessage->SetAutoWrapText(true);
 			NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedGeometry().GetLocalSize().X);
-			//NewMessage->SetWrapTextAt(ChatScrollBox->GetCachedWidget().Get()->GetDesiredSize().X);
 			NewMessage->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
 
-			ChatScrollBox->AddChild(NewMessage);
-			NewMessage->SetText(InMessage);
+			TArray<TSubclassOf<URichTextBlockDecorator>> Decorators;
+			Decorators.Add(UItemDecorator::StaticClass());
+			NewMessage->SetDecorators(Decorators);
 
-			// 밑으로 스크롤 해줌.
+			//NewMessage->SetText(InMessage);
+
+			//테스트
+			NewMessage->SetText(FText::FromString("<Item><New Item></> Item Info"));
+			//NewMessage->SetText(FText::FromString("<Item id=\"potion\">RedPotion</Item>"));
+
+			ChatScrollBox->AddChild(NewMessage);
 			ChatScrollBox->ScrollToEnd();
 		}
 	}
