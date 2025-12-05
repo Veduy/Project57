@@ -15,22 +15,19 @@ FItemTextDecorator::FItemTextDecorator(URichTextBlock* InOwner)
 
 bool FItemTextDecorator::Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const
 {
-	return RunParseResult.Name == TEXT("Item"); 
+    return RunParseResult.Name == TEXT("Item");
 }
 
 TSharedPtr<SWidget> FItemTextDecorator::CreateDecoratorWidget(const FTextRunInfo& RunInfo, const FTextBlockStyle& DefaultTextStyle) const
 {
-    //RunInfo.Content;
-    //RunInfo.MetaData;
-
-	return SNew(STextBlock)
+    return SNew(STextBlock)
         .Text(RunInfo.Content)
         .Font(DefaultTextStyle.Font)
-        .ColorAndOpacity(FSlateColor(FLinearColor(1.f, 1.f, 0.2f))) // 노란 텍스트
+        .ColorAndOpacity(FSlateColor(FLinearColor(0.7f, 0.0f, 0.7f, 1.0f))) //보라색
         .ToolTip(SNew(SToolTip)
             [
                 SNew(STextBlock)
-                    .Text(FText::Format(FText::FromString("Item Info: \n ..."), RunInfo.Content))
+                    .Text(FText::Format(FText::FromString("Item Info: \n\n\n\n\n ..."), RunInfo.Content))
                     .Font(DefaultTextStyle.Font)
                     .ColorAndOpacity(FSlateColor(FLinearColor::White))
             ]

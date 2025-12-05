@@ -131,14 +131,11 @@ void ULobbyWidget::AddMessage(const FText& InMessage)
 			NewMessage->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
 
 			TArray<TSubclassOf<URichTextBlockDecorator>> Decorators;
-			Decorators.Add(UItemDecorator::StaticClass());
+			Decorators.Add(ItemDecoratorClass);
 			NewMessage->SetDecorators(Decorators);
 
 			//NewMessage->SetText(InMessage);
-
-			//테스트
-			NewMessage->SetText(FText::FromString("<Item><New Item></> Item Info"));
-			//NewMessage->SetText(FText::FromString("<Item id=\"potion\">RedPotion</Item>"));
+			NewMessage->SetText(FText::FromString("<Item><New Item></> Item Info")); //Decorator Test
 
 			ChatScrollBox->AddChild(NewMessage);
 			ChatScrollBox->ScrollToEnd();

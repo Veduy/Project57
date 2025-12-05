@@ -12,6 +12,7 @@ class UButton;
 class UEditableTextBox;
 class UTextBlock;
 class UScrollBox;
+class URichTextBlockDecorator;
 
 /**
  * 
@@ -65,6 +66,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
 	TObjectPtr<UTextBlock> LeftTime;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (WidgetBind))
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UDataTable> TextStyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TSubclassOf<URichTextBlockDecorator> ItemDecoratorClass;
 };

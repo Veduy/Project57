@@ -16,4 +16,7 @@ class PROJECT57_API UItemDecorator : public URichTextBlockDecorator
 
 public:
 	virtual TSharedPtr<ITextDecorator> CreateDecorator(URichTextBlock* InOwner);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Data")
+	TSubclassOf<UUserWidget> ItemTooltipClass;
 };
