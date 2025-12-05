@@ -39,12 +39,23 @@ public:
 	void StopFire();
 
 	UFUNCTION(BlueprintCallable)
-	void FireProjectile(FTransform SpawnTrasnform, FHitResult InHitResult);
+	void FireProjectile(FTransform SpawnTrasnform);
+	
+	UFUNCTION()
+	bool CalculateShootData(FVector& OutSpawnLocation, FVector& OutTargetLocation, FVector& OutBulletDirection, FRotator& OutAimRotation);
+
+	// 호출은 서버에서, 모든클라이언트에서 실행
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastSpawnMuzzleFlash(const FVector& SpawnLocation, const FRotator& AimRotation);
+	void MulticastSpawnMuzzleFlash_Implementation(const FVector& SpawnLocation, const FRotator& AimRotation);
+	
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFireSound(const FVector& SpawnLocation);
+	void MulticastPlayFireSound_Implementation(const FVector& SpawnLocation);
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<USkeletalMeshComponent> Mesh;
-
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	TSubclassOf<AProjectileBase> ProjectileClass;
@@ -80,6 +91,7 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data", meta = (ClampMin = 0.1f, ClampMax = 2.f, Unit = "s"))
 	uint8 bFullAuto : 1 = false;
 
+	UPROPERTY()
 	float TimeOfLastShot;
 	
 	FTimerHandle FireTimer;

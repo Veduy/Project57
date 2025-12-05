@@ -34,6 +34,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -42,8 +44,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
-	//FActorBeginOverlapSignature, AActor, OnActorBeginOverlap, AActor*, OverlappedActor, AActor*, OtherActor );
 
 	UFUNCTION()
 	void ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
@@ -54,6 +54,9 @@ public:
 	virtual void SetGenericTeamId(const FGenericTeamId& InTeamID) override;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	UFUNCTION()
+	FRotator GetAimOffset() const;
 
 public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
@@ -77,18 +80,26 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Reload();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void ReloadWeapon();
 		
 	UFUNCTION(BlueprintCallable)
 	void DoFire();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void StartFire();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void StopFire();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStartFire();
+	void ServerStartFire_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopFire();
+	void ServerStopFire_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	void StartIronSight(const FInputActionValue& Value);
@@ -105,9 +116,59 @@ public:
 	UFUNCTION()
 	void DoHitReact();
 
+	UFUNCTION()
+	void StartSprint();
+
+	UFUNCTION()
+	void StopSprint();
+
+	UFUNCTION()
+	void LeftLean(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void EndLeftLean();
+
+	UFUNCTION()
+	void RightLean(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void EndRightLean();
+
 	void EquipItem(AInteractActor* PickedupItem);
 	void UseItem(AInteractActor* PickedupItem);
 	void EatItem(AInteractActor* PickedupItem);
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopSprint();
+	void ServerStopSprint_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStartSprint();
+	void ServerStartSprint_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStartIronSight();
+	void ServerStartIronSight_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopIronSight();
+	void ServerStopIronSight_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeftLean();
+	void ServerLeftLean_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerEndLeftLean();
+	void ServerEndLeftLean_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRightLean();
+	void ServerRightLean_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerEndRightLean();
+	void ServerEndRightLean_Implementation();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -117,33 +178,44 @@ public:
 	TObjectPtr<UInputAction> IA_Fire;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Sprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_IronSight;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_LeftLean;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_RightLean;
+
+public:
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	float CurrentHP = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	float MaxHP = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bSprint : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bLeftLean : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bRightLean : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bAiming : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bIsFire : 1 = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bIsIronSight : 1 = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	EWeaponState WeaponState = EWeaponState::Unarmed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
@@ -157,6 +229,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Team")
 	FGenericTeamId TeamID;
+
 private:
 	FName HitMonatageSection[8] =
 	{

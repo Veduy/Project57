@@ -8,6 +8,12 @@
 // Sets default values
 AInteractActor::AInteractActor()
 {
+	SetReplicates(true);
+	SetReplicateMovement(true);
+	bNetUseOwnerRelevancy = true;
+	bNetLoadOnClient = true;
+	bAlwaysRelevant = true;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 

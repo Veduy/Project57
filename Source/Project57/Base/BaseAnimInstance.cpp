@@ -16,8 +16,8 @@ void UBaseAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		GroundSpeed = Character->GetCharacterMovement()->Velocity.Size2D();
 		bSprint = Character->bSprint;
 		Direction = UKismetAnimationLibrary::CalculateDirection(Character->GetCharacterMovement()->Velocity, Character->GetActorRotation());
-		AimYaw = Character->GetBaseAimRotation().Yaw;
-		AimPitch = Character->GetBaseAimRotation().Pitch;
+		AimYaw = Character->GetAimOffset().Yaw;
+		AimPitch = Character->GetAimOffset().Pitch;
 		bAiming = Character->bAiming;
 		bLeftLean = Character->bLeftLean;
 		bRightLean = Character->bRightLean;

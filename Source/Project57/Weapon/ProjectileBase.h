@@ -22,16 +22,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UFUNCTION()
 	void ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	UFUNCTION(BlueprintCallable)
-	virtual void SpawnHitEffect(FHitResult Hit);
-
-public:	
+	virtual void SpawnHitEffect(const FHitResult& Hit);
+	
 	virtual void Tick(float DeltaTime) override;
-
+	
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBoxComponent> Collision;
 
@@ -49,7 +47,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UMaterialInstance> Decal;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	FHitResult HitResult;	
 };

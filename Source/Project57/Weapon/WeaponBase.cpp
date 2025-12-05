@@ -18,9 +18,16 @@
 #include "../Weapon/DamageTypeBase.h"
 #include "../Weapon/ProjectileBase.h"
 
+#include "../Network/NetworkUtil.h"
+
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
+	SetReplicates(true);
+	SetReplicateMovement(true);
+	bNetUseOwnerRelevancy = true;
+	bNetLoadOnClient = true;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -50,6 +57,26 @@ void AWeaponBase::Reload()
 
 void AWeaponBase::Fire()
 {
+	// 여기는 서버에서 실행될 거임.
+
+	if (!GetOwner())
+	{
+		NET_LOG("Owner is Nullp");
+		return;
+	}
+
+	if (!GetOwner()->HasAuthority())
+	{
+		NET_LOG("No Authority");
+		return;
+	}
+
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (!Character)
+	{
+		return;
+	}
+
 	float CurrentTimeOfShoot = GetWorld()->TimeSeconds - TimeOfLastShot;
 
 	if (CurrentTimeOfShoot < FireRate)
@@ -62,10 +89,65 @@ void AWeaponBase::Fire()
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
 	}
 
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (ABasePC* PC = Cast<ABasePC>(Character->GetController()))
+	FVector SpawnLocation;
+	FVector TargetLocation;
+	FVector BulletDirection;
+	FRotator AimRotation;
+	FHitResult HitResult;
+
+	CalculateShootData(SpawnLocation, TargetLocation, BulletDirection, AimRotation);
+
+	FireProjectile(FTransform(AimRotation, SpawnLocation, FVector::OneVector));
+
+	// Recoil
+	Character->AddControllerPitchInput(FMath::FRandRange(-0.5, 0));
+	Character->AddControllerYawInput(FMath::FRandRange(-0.5, 0.5));
+
+	ABasePC* PC = Cast<ABasePC>(Character->GetController());
 	{
 		PC->FireAim();
+	}
+
+	/*if(CurBulletCount > 0)
+	{
+		CurBulletCount--;
+		MulticastSpawnMuzzleFlash_Implementation();
+		MulticastPlayFireSound_Implementation();
+	}*/
+
+	TimeOfLastShot = GetWorld()->TimeSeconds;
+}
+
+void AWeaponBase::StopFire()
+{
+	if (FireTimer.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(FireTimer);
+	}
+}
+
+void AWeaponBase::FireProjectile(FTransform SpawnTrasnform)
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AProjectileBase* Projectile = GetWorld()->SpawnActor<AProjectileBase>(ProjectileClass, SpawnTrasnform, SpawnParams);
+
+	Projectile->SetOwner(this);
+}
+
+bool AWeaponBase::CalculateShootData(FVector& OutSpawnLocation, FVector& OutTargetLocation, FVector& OutBulletDirection, FRotator& OutAimRotation)
+{
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (!Character)
+	{
+		return false;
+	}
+
+	if (ABasePC* PC = Cast<ABasePC>(Character->GetController()))
+	{
+		FString PCNum = PC->GetName();
+		NET_LOG(*PCNum);
 
 		int32 SizeX;
 		int32 SizeY;
@@ -107,48 +189,30 @@ void AWeaponBase::Fire()
 			FLinearColor::Green,
 			0.5f);
 
-		FVector SpawnLocation = Mesh->GetSocketLocation(FName("Muzzle"));
-		FVector TargetLocation = bResult ? HitResult.ImpactPoint : End;
-		FVector BulletDirection = TargetLocation - SpawnLocation;
+		OutSpawnLocation = Mesh->GetSocketLocation(FName("Muzzle"));
+		OutTargetLocation = bResult ? HitResult.ImpactPoint : End;
+		OutBulletDirection = OutTargetLocation - OutSpawnLocation;
+		OutAimRotation = UKismetMathLibrary::FindLookAtRotation(OutSpawnLocation, OutTargetLocation + (UKismetMathLibrary::RandomUnitVector() * 0.3f));
 
-		FRotator AimRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, TargetLocation + BulletDirection +
-			UKismetMathLibrary::RandomUnitVector() * 5.f);
-
-		FireProjectile(FTransform(AimRotation, SpawnLocation, FVector::OneVector), HitResult);
-		
-		if (MuzzleFlash)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash,
-				SpawnLocation, AimRotation, FVector(3.f,3.f,3.f));
-		}
-
-		// Recoil
-		//FMath::FInterpTo()
-		Character->AddControllerPitchInput(FMath::FRandRange(-0.5, 0)); 
-		Character->AddControllerYawInput(FMath::FRandRange(-0.5, 0.5)); 
+		return true;
 	}
 
-	if(CurBulletCount > 0)
+	return false;
+}
+
+void AWeaponBase::MulticastSpawnMuzzleFlash_Implementation(const FVector& SpawnLocation, const FRotator& AimRotation)
+{
+	if(MuzzleFlash)
 	{
-		CurBulletCount--;
-
-		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, GetActorLocation());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash,
+			SpawnLocation, AimRotation, FVector(3.f,3.f,3.f));
 	}
-
-	TimeOfLastShot = GetWorld()->TimeSeconds;
 }
 
-void AWeaponBase::StopFire()
+void AWeaponBase::MulticastPlayFireSound_Implementation(const FVector& SpawnLocation)
 {
-	GetWorld()->GetTimerManager().ClearTimer(FireTimer);
+	if (FireSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, SpawnLocation);
+	}
 }
-
-void AWeaponBase::FireProjectile(FTransform SpawnTrasnform, FHitResult InHitResult)
-{
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AProjectileBase* Projectile = GetWorld()->SpawnActor<AProjectileBase>(ProjectileClass, SpawnTrasnform, SpawnParams);
-	Projectile->HitResult = InHitResult;
-}
-

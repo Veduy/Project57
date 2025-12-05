@@ -12,6 +12,11 @@
 // Sets default values
 AProjectileBase::AProjectileBase()
 {
+	SetReplicates(true);
+	SetReplicateMovement(true);
+	bNetUseOwnerRelevancy = true;
+	bNetLoadOnClient = true;
+
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -37,14 +42,18 @@ void AProjectileBase::BeginPlay()
 	SetLifeSpan(5.f);
 
 	Collision->OnComponentHit.AddDynamic(this, &AProjectileBase::ComponentHit);
-	
 }
 
 void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-
 	SpawnHitEffect(Hit);
+
+	if (GetOwner())
+	{
+		//서버가 아니면 총알의 주인이 없다.
+		return;
+	}
 
 	if (APawn* Pawn = Cast<APawn>(GetOwner()->GetOwner()))
 	{
@@ -60,10 +69,9 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 	}
 
 	//Destroy();
-	
 }
 
-void AProjectileBase::SpawnHitEffect(FHitResult Hit)
+void AProjectileBase::SpawnHitEffect(const FHitResult& Hit)
 {
 	if (Decal)
 	{
