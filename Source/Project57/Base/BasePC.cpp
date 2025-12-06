@@ -3,6 +3,8 @@
 
 #include "BasePC.h"
 #include "BaseHUD.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 
 ABasePC::ABasePC()
 {
@@ -14,6 +16,17 @@ void ABasePC::BeginPlay()
 
 	bShowMouseCursor = false;
 	SetInputMode(FInputModeGameOnly());
+
+	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(Player))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		{
+			if (InputMapping)
+			{
+				InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
+			}
+		}
+	}
 }
 
 void ABasePC::Tick(float DeltaTime)

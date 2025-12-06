@@ -7,6 +7,8 @@
 #include "BasePC.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRecoilSignature, float, Vertical, float, Horizontal);
+
+class UInputMappingContext;
 /**
  * 
  */
@@ -22,6 +24,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+
 	FRecoilSignature OnRecoil;
 
 public:
@@ -29,6 +32,9 @@ public:
 	void FireAim();
 
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")	
+	TSoftObjectPtr<UInputMappingContext> InputMapping;
+
 	float VerticalRecoil;
 	float HorizontalRecoil;
 };

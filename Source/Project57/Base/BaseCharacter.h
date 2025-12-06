@@ -90,22 +90,30 @@ public:
 	UFUNCTION()
 	void StartFire();
 
-	UFUNCTION()
-	void StopFire();
-
 	UFUNCTION(Server, Reliable)
 	void ServerStartFire();
 	void ServerStartFire_Implementation();
+
+	UFUNCTION()
+	void StopFire();
 
 	UFUNCTION(Server, Reliable)
 	void ServerStopFire();
 	void ServerStopFire_Implementation();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void StartIronSight(const FInputActionValue& Value);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Server, Reliable)
+	void ServerStartIronSight();
+	void ServerStartIronSight_Implementation();
+
+	UFUNCTION()
 	void StopIronSight(const FInputActionValue& Value);
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopIronSight();
+	void ServerStopIronSight_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	void DoDeath();
@@ -119,56 +127,48 @@ public:
 	UFUNCTION()
 	void StartSprint();
 
+	UFUNCTION(Server, Reliable)
+	void ServerStartSprint();
+	void ServerStartSprint_Implementation();
+
 	UFUNCTION()
 	void StopSprint();
-
-	UFUNCTION()
-	void LeftLean(const FInputActionValue& Value);
-
-	UFUNCTION()
-	void EndLeftLean();
-
-	UFUNCTION()
-	void RightLean(const FInputActionValue& Value);
-
-	UFUNCTION()
-	void EndRightLean();
-
-	void EquipItem(AInteractActor* PickedupItem);
-	void UseItem(AInteractActor* PickedupItem);
-	void EatItem(AInteractActor* PickedupItem);
 
 	UFUNCTION(Server, Reliable)
 	void ServerStopSprint();
 	void ServerStopSprint_Implementation();
 
-	UFUNCTION(Server, Reliable)
-	void ServerStartSprint();
-	void ServerStartSprint_Implementation();
-
-	UFUNCTION(Server, Reliable)
-	void ServerStartIronSight();
-	void ServerStartIronSight_Implementation();
-
-	UFUNCTION(Server, Reliable)
-	void ServerStopIronSight();
-	void ServerStopIronSight_Implementation();
+	UFUNCTION()
+	void LeftLean(const FInputActionValue& Value);
 
 	UFUNCTION(Server, Reliable)
 	void ServerLeftLean();
 	void ServerLeftLean_Implementation();
 
+	UFUNCTION()
+	void EndLeftLean();
+
 	UFUNCTION(Server, Reliable)
 	void ServerEndLeftLean();
 	void ServerEndLeftLean_Implementation();
+
+	UFUNCTION()
+	void RightLean(const FInputActionValue& Value);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRightLean();
 	void ServerRightLean_Implementation();
 
+	UFUNCTION()
+	void EndRightLean();
+
 	UFUNCTION(Server, Reliable)
 	void ServerEndRightLean();
 	void ServerEndRightLean_Implementation();
+
+	void EquipItem(AInteractActor* PickedupItem);
+	void UseItem(AInteractActor* PickedupItem);
+	void EatItem(AInteractActor* PickedupItem);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)

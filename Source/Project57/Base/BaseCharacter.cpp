@@ -383,7 +383,7 @@ void ABaseCharacter::ServerStartSprint_Implementation()
 void ABaseCharacter::ServerStartIronSight_Implementation()
 {
 	bIsIronSight = true;
-	bAiming = true;
+	 = true;
 }
 
 void ABaseCharacter::ServerStopIronSight_Implementation()
