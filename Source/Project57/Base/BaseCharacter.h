@@ -85,14 +85,14 @@ public:
 	void ReloadWeapon();
 		
 	UFUNCTION(BlueprintCallable)
-	void DoFire();
+	void DoFire(const FVector& ClientHitLocation);
 
 	UFUNCTION()
 	void StartFire();
 
 	UFUNCTION(Server, Reliable)
-	void ServerStartFire();
-	void ServerStartFire_Implementation();
+	void ServerStartFire(const FVector& ClientHitLocation);
+	void ServerStartFire_Implementation(const FVector& ClientHitLocation);
 
 	UFUNCTION()
 	void StopFire();
@@ -205,9 +205,6 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bRightLean : 1;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
-	uint8 bAiming : 1;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bIsFire : 1 = false;

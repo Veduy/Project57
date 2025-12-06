@@ -64,7 +64,6 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ABaseCharacter, bSprint);
 	DOREPLIFETIME(ABaseCharacter, bLeftLean);
 	DOREPLIFETIME(ABaseCharacter, bRightLean);
-	DOREPLIFETIME(ABaseCharacter, bAiming);
 	DOREPLIFETIME(ABaseCharacter, bIsFire);
 	DOREPLIFETIME(ABaseCharacter, bIsIronSight);
 	DOREPLIFETIME(ABaseCharacter, WeaponState);
@@ -232,19 +231,32 @@ void ABaseCharacter::ReloadWeapon()
 	}
 }
 
-void ABaseCharacter::DoFire()
+void ABaseCharacter::DoFire(const FVector& ClientHitLocation)
 {
+	// 서버에서 실행
 	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
 	if (ChildWeapon)
 	{
-		ChildWeapon->Fire();
+		ChildWeapon->StartFire(ClientHitLocation);
 	}
 }
 
 void ABaseCharacter::StartFire()
 {
 	bIsFire = true;
-	ServerStartFire();
+
+	FVector AimOrigin;
+	FVector AimDirection;
+	FVector HitLocation;
+
+	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
+	if (ChildWeapon)
+	{
+		if (ChildWeapon->GetAimData(AimOrigin, AimDirection, HitLocation))
+		{
+			ServerStartFire(HitLocation);
+		}
+	}
 }
 
 void ABaseCharacter::StopFire()
@@ -253,10 +265,10 @@ void ABaseCharacter::StopFire()
 	ServerStopFire();
 }
 
-void ABaseCharacter::ServerStartFire_Implementation()
+void ABaseCharacter::ServerStartFire_Implementation(const FVector& ClientHitLocation)
 {
 	bIsFire = true;
-	DoFire();
+	DoFire(ClientHitLocation);
 }
 
 void ABaseCharacter::ServerStopFire_Implementation()
@@ -383,13 +395,11 @@ void ABaseCharacter::ServerStartSprint_Implementation()
 void ABaseCharacter::ServerStartIronSight_Implementation()
 {
 	bIsIronSight = true;
-	 = true;
 }
 
 void ABaseCharacter::ServerStopIronSight_Implementation()
 {
 	bIsIronSight = false;
-	bAiming = false;
 }
 
 void ABaseCharacter::ServerLeftLean_Implementation()

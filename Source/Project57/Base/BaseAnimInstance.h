@@ -18,7 +18,6 @@ class PROJECT57_API UBaseAnimInstance : public UAnimInstance
 public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float GroundSpeed = 0.f;
@@ -40,9 +39,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bRightLean : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
-	uint8 bAiming : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float CurrentLeanAngle;

@@ -28,8 +28,6 @@ public:
 
 	virtual void SpawnHitEffect(const FHitResult& Hit);
 	
-	virtual void Tick(float DeltaTime) override;
-	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBoxComponent> Collision;

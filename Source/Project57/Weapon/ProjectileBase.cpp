@@ -60,6 +60,7 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 		APlayerController* PC = Cast<APlayerController>(Pawn->GetController());
 
 		UGameplayStatics::ApplyPointDamage(OtherActor, 10, -Hit.ImpactNormal, Hit, PC, this, UDamageTypeBase::StaticClass());
+
 		//¹üÀ§ °ø°Ý, ÆøÅº
 		//UGameplayStatics::wda ApplyRadialDamage(HitResult.GetActor(), 10, HitResult.ImpactPoint, 300.0f, UDamageTypeBase::StaticClass(),
 		//	ActorsToIgnore,
@@ -85,12 +86,3 @@ void AProjectileBase::SpawnHitEffect(const FHitResult& Hit)
 		MadeDecal->SetFadeScreenSize(0.f);
 	}
 }
-
-// Called every frame
-void AProjectileBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-

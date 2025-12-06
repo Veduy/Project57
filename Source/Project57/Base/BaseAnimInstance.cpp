@@ -18,7 +18,6 @@ void UBaseAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Direction = UKismetAnimationLibrary::CalculateDirection(Character->GetCharacterMovement()->Velocity, Character->GetActorRotation());
 		AimYaw = Character->GetAimOffset().Yaw;
 		AimPitch = Character->GetAimOffset().Pitch;
-		bAiming = Character->bAiming;
 		bLeftLean = Character->bLeftLean;
 		bRightLean = Character->bRightLean;
 
@@ -37,11 +36,8 @@ void UBaseAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 
 		CurrentLeanAngle = FMath::FInterpTo(CurrentLeanAngle, TargetLeanAngle, DeltaSeconds, 8.0f);
-
 		WeaponState = Character->WeaponState;
-
 		bIsCrouched = Character->bIsCrouched;
-
 		bIsFalling = Character->GetMovementComponent()->IsFalling();
 	}
 }
