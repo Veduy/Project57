@@ -8,6 +8,7 @@
 
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
+#include "Net/UnrealNetwork.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -49,7 +50,23 @@ void AWeaponBase::Tick(float DeltaTime)
 
 }
 
+void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AWeaponBase, CurBulletCount);
+	DOREPLIFETIME(AWeaponBase, MaxBulletCount);
+	DOREPLIFETIME(AWeaponBase, FireRate);
+	DOREPLIFETIME(AWeaponBase, bFullAuto);
+	DOREPLIFETIME(AWeaponBase, TimeOfLastShot);
+}
+
 void AWeaponBase::Reload()
+{
+	ServerReload();
+}
+
+void AWeaponBase::ServerReload_Implementation()
 {
 	UE_LOG(LogTemp, Display, TEXT("Reload Completed"));
 	CurBulletCount = MaxBulletCount;
@@ -57,6 +74,11 @@ void AWeaponBase::Reload()
 
 void AWeaponBase::Fire()
 {
+	if (CurBulletCount < 1)
+	{
+		return;
+	}
+
 	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
 	if (!Character)
 	{
@@ -74,8 +96,16 @@ void AWeaponBase::Fire()
 
 	if (bFullAuto)
 	{
-		NET_LOG("");
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
+		TempPlayFireSound();
+	}
+}
+
+void AWeaponBase::TempPlayFireSound()
+{
+	if (FireSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, GetActorLocation());
 	}
 }
 
@@ -186,6 +216,11 @@ void AWeaponBase::MulticastSpawnMuzzleFlash_Implementation(const FVector& SpawnL
 
 void AWeaponBase::MulticastPlayFireSound_Implementation(const FVector& SpawnLocation)
 {
+	if (HasAuthority())
+	{
+		return;
+	}
+
 	if (FireSound)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, SpawnLocation);

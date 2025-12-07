@@ -22,19 +22,27 @@ class PROJECT57_API AWeaponBase : public AItemBase
 public:	
 	AWeaponBase();
 
-protected:
+public:	
 	virtual void BeginPlay() override;
 
-public:	
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	UFUNCTION()
 	void Reload();
 
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
+	void ServerReload_Implementation();
+
 	// BaseCharacter에서 발사 입력이 들어왔을때, 호출될 함수.
 	UFUNCTION()
 	void Fire();
+
+	UFUNCTION()
+	void TempPlayFireSound();
 
 	UFUNCTION()
 	void StopFire();
@@ -86,20 +94,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Data")
 	TObjectPtr<UParticleSystem> MuzzleFlash;   
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
+public:
+	UPROPERTY(Replicated, EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	int32 MaxBulletCount = 100;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(Replicated, EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	int32 CurBulletCount = 100;
 
 	// 초당 발사율 >> (UI표시할때 분당 발사율로 변환)
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(Replicated, EditAnyWhere, BlueprintReadWrite, Category = "Data")
 	float FireRate = 1.f;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Data", meta = (ClampMin = 0.1f, ClampMax = 2.f, Unit = "s"))
+	UPROPERTY(Replicated, EditAnyWhere, BlueprintReadWrite, Category = "Data", meta = (ClampMin = 0.1f, ClampMax = 2.f, Unit = "s"))
 	uint8 bFullAuto : 1 = false;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	float TimeOfLastShot;
 	
 	FTimerHandle FireTimer;

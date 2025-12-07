@@ -81,6 +81,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Reload();
 	
+	// Notify Execute
 	UFUNCTION(BlueprintCallable)
 	void ReloadWeapon();
 		
