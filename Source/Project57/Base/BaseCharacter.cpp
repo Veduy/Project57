@@ -84,6 +84,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		Input->BindAction(IA_Reload, ETriggerEvent::Triggered, this, &ABaseCharacter::Reload);
+
 		Input->BindAction(IA_Fire, ETriggerEvent::Started, this, &ABaseCharacter::StartFire);
 		Input->BindAction(IA_Fire, ETriggerEvent::Completed, this, &ABaseCharacter::StopFire);
 
@@ -237,7 +238,7 @@ void ABaseCharacter::DoFire(const FVector& ClientHitLocation)
 	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
 	if (ChildWeapon)
 	{
-		ChildWeapon->StartFire(ClientHitLocation);
+		//ChildWeapon->StartFire(ClientHitLocation);
 	}
 }
 
@@ -248,19 +249,10 @@ void ABaseCharacter::StartFire()
 		return;
 	}
 
-	bIsFire = true;
-
-	FVector AimOrigin;
-	FVector AimDirection;
-	FVector HitLocation;
-
-	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
-	if (ChildWeapon)
+	AWeaponBase* WeaponActor = Cast<AWeaponBase>(Weapon->GetChildActor());
+	if (WeaponActor)
 	{
-		if (ChildWeapon->GetAimData(AimOrigin, AimDirection, HitLocation))
-		{
-			ServerStartFire(HitLocation);
-		}
+		WeaponActor->Fire();
 	}
 }
 

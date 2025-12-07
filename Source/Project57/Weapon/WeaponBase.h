@@ -32,11 +32,13 @@ public:
 	UFUNCTION()
 	void Reload();
 
-	UFUNCTION()
-	void StartFire(const FVector& HitLocation);
-
+	// BaseCharacter에서 발사 입력이 들어왔을때, 호출될 함수.
 	UFUNCTION()
 	void Fire();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerStartFire(const FVector& HitLocation);
+	void ServerStartFire_Implementation(const FVector& HitLocation);
 
 	UFUNCTION()
 	void StopFire();
@@ -98,8 +100,6 @@ public:
 
 	UPROPERTY()
 	float TimeOfLastShot;
-
-	FVector PendingHitLocation;
 	
 	FTimerHandle FireTimer;
 };

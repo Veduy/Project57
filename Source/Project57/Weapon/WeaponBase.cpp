@@ -55,13 +55,102 @@ void AWeaponBase::Reload()
 	CurBulletCount = MaxBulletCount;
 }
 
-void AWeaponBase::StartFire(const FVector& HitLocation)
+void AWeaponBase::Fire()
 {
-	PendingHitLocation = HitLocation;
-	Fire();
+	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
+	if (!Character)
+	{
+		return;
+	}
+
+	FVector AimOrigin;
+	FVector AimDirection;
+	FVector HitLocation;
+	if (GetAimData(AimOrigin, AimDirection, HitLocation))
+	{
+		// 서버 함수 호출;
+		ServerStartFire(HitLocation);
+	}
+
+	if (bFullAuto)
+	{
+		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
+	}
+
+
+	//// 서버에서 실행될 로직
+	//NET_LOG("");
+
+	//if (CurBulletCount < 1)
+	//{
+	//	return;
+	//}
+
+	//float CurrentTimeOfShoot = GetWorld()->TimeSeconds - TimeOfLastShot;
+
+	//if (CurrentTimeOfShoot < FireRate)
+	//{
+	//	return;
+	//}
+
+	//ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
+
+	//if (bFullAuto)
+	//{
+	//	GetWorld()->GetTimerManager().SetTimer(FireTimer, Character, &ABaseCharacter::StartFire, FireRate, false);
+	//}
+
+	//FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
+	//FHitResult Hit;
+
+	//FVector ServerTraceEnd = PendingHitLocation;
+
+	//// 서버에서 보정
+	//TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	//ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+	//ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+	//ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
+	//TArray<AActor*> ActorsToIgnore;
+	//FHitResult HitResult;
+
+	//bool bResult = UKismetSystemLibrary::LineTraceSingleForObjects(
+	//	GetWorld(),
+	//	MuzzleLocation,
+	//	ServerTraceEnd,
+	//	ObjectTypes,
+	//	true,
+	//	ActorsToIgnore,
+	//	EDrawDebugTrace::ForDuration,
+	//	HitResult,
+	//	true,
+	//	FLinearColor::Red, 
+	//	FLinearColor::Green,
+	//	0.5f);
+
+	//FVector FinalTarget = HitResult.bBlockingHit ? HitResult.ImpactPoint : ServerTraceEnd;
+	//FVector Dir = (FinalTarget - MuzzleLocation).GetSafeNormal();
+	//
+	//FTransform SpawnTransform = FTransform(Dir.Rotation(), MuzzleLocation, FVector::OneVector);
+	//SpawnProjectile(SpawnTransform);
+
+	//CurBulletCount--;
+	//MulticastSpawnMuzzleFlash(MuzzleLocation, Dir.Rotation());
+	//MulticastPlayFireSound(MuzzleLocation);
+
+	////// Recoil
+	//ABasePC* PC = Cast<ABasePC>(Character->GetController());
+	//if(PC)
+	//{
+	//	PC->AddPitchInput(FMath::FRandRange(-0.5f, 0.f));
+	//	PC->AddYawInput(FMath::FRandRange(-0.5f, 0.5f));
+	//	PC->FireAim();
+	//}
+
+	//TimeOfLastShot = GetWorld()->TimeSeconds;
+
 }
 
-void AWeaponBase::Fire()
+void AWeaponBase::ServerStartFire_Implementation(const FVector& HitLocation)
 {
 	// 서버에서 실행될 로직
 	NET_LOG("");
@@ -78,19 +167,12 @@ void AWeaponBase::Fire()
 		return;
 	}
 
-	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
-
-	if (bFullAuto)
-	{
-		GetWorld()->GetTimerManager().SetTimer(FireTimer, Character, &ABaseCharacter::StartFire, FireRate, false);
-	}
-
 	FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
 	FHitResult Hit;
 
-	FVector ServerTraceEnd = PendingHitLocation;
+	FVector ServerTraceEnd = HitLocation;
 
-	// 서버에서 보정
+	// 서버에서 한번더 Trace check
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
@@ -115,7 +197,7 @@ void AWeaponBase::Fire()
 	FVector FinalTarget = HitResult.bBlockingHit ? HitResult.ImpactPoint : ServerTraceEnd;
 	FVector Dir = (FinalTarget - MuzzleLocation).GetSafeNormal();
 	
-	FTransform SpawnTransform = FTransform(Dir.Rotation(), MuzzleLocation, FVector::OneVector);
+	FTransform SpawnTransform = FTransform(Dir.Rotation(),MuzzleLocation,FVector::OneVector);
 	SpawnProjectile(SpawnTransform);
 
 	CurBulletCount--;
@@ -123,6 +205,8 @@ void AWeaponBase::Fire()
 	MulticastPlayFireSound(MuzzleLocation);
 
 	//// Recoil
+	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
+
 	ABasePC* PC = Cast<ABasePC>(Character->GetController());
 	if(PC)
 	{
