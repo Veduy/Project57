@@ -12,10 +12,10 @@
 // Sets default values
 AProjectileBase::AProjectileBase()
 {
-	SetReplicates(true);
-	SetReplicateMovement(true);
+	bReplicates = true;
 	bNetUseOwnerRelevancy = true;
 	bNetLoadOnClient = true;
+	SetReplicateMovement(true);
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

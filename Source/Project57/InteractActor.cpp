@@ -8,7 +8,7 @@
 // Sets default values
 AInteractActor::AInteractActor()
 {
-	SetReplicates(true);
+	bReplicates = true;
 	SetReplicateMovement(true);
 	bNetUseOwnerRelevancy = true;
 	bNetLoadOnClient = true;

@@ -35,20 +35,21 @@ public:
 	// BaseCharacter에서 발사 입력이 들어왔을때, 호출될 함수.
 	UFUNCTION()
 	void Fire();
-	
-	UFUNCTION(Server, Reliable)
-	void ServerStartFire(const FVector& HitLocation);
-	void ServerStartFire_Implementation(const FVector& HitLocation);
 
 	UFUNCTION()
 	void StopFire();
 
+	UFUNCTION(Server, Reliable)
+	void ServerStartFire(const FVector& HitLocation);
+	void ServerStartFire_Implementation(const FVector& HitLocation);
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopFire();
+	void ServerStopFire_Implementation();
+
 	UFUNCTION(BlueprintCallable)
 	void SpawnProjectile(const FTransform& SpawnTrasnform);
 	
-	UFUNCTION()
-	bool CalculateShootData(FVector& OutSpawnLocation, FVector& OutTargetLocation, FVector& OutBulletDirection, FRotator& OutAimRotation);
-
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastSpawnMuzzleFlash(const FVector& SpawnLocation, const FRotator& AimRotation);
 	void MulticastSpawnMuzzleFlash_Implementation(const FVector& SpawnLocation, const FRotator& AimRotation);

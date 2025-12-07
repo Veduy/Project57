@@ -232,16 +232,6 @@ void ABaseCharacter::ReloadWeapon()
 	}
 }
 
-void ABaseCharacter::DoFire(const FVector& ClientHitLocation)
-{
-	// 서버에서 실행
-	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
-	if (ChildWeapon)
-	{
-		//ChildWeapon->StartFire(ClientHitLocation);
-	}
-}
-
 void ABaseCharacter::StartFire()
 {
 	if (!Weapon)
@@ -252,29 +242,23 @@ void ABaseCharacter::StartFire()
 	AWeaponBase* WeaponActor = Cast<AWeaponBase>(Weapon->GetChildActor());
 	if (WeaponActor)
 	{
+		bIsFire = true;
 		WeaponActor->Fire();
 	}
 }
 
 void ABaseCharacter::StopFire()
 {
-	bIsFire = false;
-	ServerStopFire();
-}
-
-void ABaseCharacter::ServerStartFire_Implementation(const FVector& ClientHitLocation)
-{
-	bIsFire = true;
-	DoFire(ClientHitLocation);
-}
-
-void ABaseCharacter::ServerStopFire_Implementation()
-{
-	bIsFire = false;
-	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
-	if (ChildWeapon)
+	if (!Weapon)
 	{
-		ChildWeapon->StopFire();
+		return;
+	}
+
+	AWeaponBase* WeaponActor = Cast<AWeaponBase>(Weapon->GetChildActor());
+	if (WeaponActor)
+	{
+		bIsFire = false;
+		WeaponActor->StopFire();
 	}
 }
 

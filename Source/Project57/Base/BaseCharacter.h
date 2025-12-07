@@ -84,22 +84,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ReloadWeapon();
 		
-	UFUNCTION(BlueprintCallable)
-	void DoFire(const FVector& ClientHitLocation);
-
 	UFUNCTION()
 	void StartFire();
 
-	UFUNCTION(Server, Reliable)
-	void ServerStartFire(const FVector& ClientHitLocation);
-	void ServerStartFire_Implementation(const FVector& ClientHitLocation);
-
 	UFUNCTION()
 	void StopFire();
-
-	UFUNCTION(Server, Reliable)
-	void ServerStopFire();
-	void ServerStopFire_Implementation();
 
 	UFUNCTION()
 	void StartIronSight(const FInputActionValue& Value);
