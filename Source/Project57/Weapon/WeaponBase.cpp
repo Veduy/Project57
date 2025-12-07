@@ -78,9 +78,11 @@ void AWeaponBase::Fire()
 		return;
 	}
 
+	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
+
 	if (bFullAuto)
 	{
-		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
+		GetWorld()->GetTimerManager().SetTimer(FireTimer, Character, &ABaseCharacter::StartFire, FireRate, false);
 	}
 
 	FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
@@ -106,7 +108,7 @@ void AWeaponBase::Fire()
 		EDrawDebugTrace::ForDuration,
 		HitResult,
 		true,
-		FLinearColor::Red,
+		FLinearColor::Red, 
 		FLinearColor::Green,
 		0.5f);
 
@@ -116,28 +118,18 @@ void AWeaponBase::Fire()
 	FTransform SpawnTransform = FTransform(Dir.Rotation(), MuzzleLocation, FVector::OneVector);
 	SpawnProjectile(SpawnTransform);
 
-	//FVector SpawnLocation;
-	//FVector TargetLocation;
-	//FVector BulletDirection;
-	//FRotator AimRotation;
-	//FHitResult HitResult;
-
-	//CalculateShootData(SpawnLocation, TargetLocation, BulletDirection, AimRotation);
-
-	//SpawnProjectile(FTransform(AimRotation, SpawnLocation, FVector::OneVector));
-
-	//CurBulletCount--;
-	//MulticastSpawnMuzzleFlash(SpawnLocation, AimRotation);
-	//MulticastPlayFireSound(SpawnLocation);
+	CurBulletCount--;
+	MulticastSpawnMuzzleFlash(MuzzleLocation, Dir.Rotation());
+	MulticastPlayFireSound(MuzzleLocation);
 
 	//// Recoil
-	//Character->AddControllerPitchInput(FMath::FRandRange(-0.5, 0));
-	//Character->AddControllerYawInput(FMath::FRandRange(-0.5, 0.5));
-
-	//ABasePC* PC = Cast<ABasePC>(Character->GetController());
-	//{
-	//	PC->FireAim();
-	//}
+	ABasePC* PC = Cast<ABasePC>(Character->GetController());
+	if(PC)
+	{
+		PC->AddPitchInput(FMath::FRandRange(-0.5f, 0.f));
+		PC->AddYawInput(FMath::FRandRange(-0.5f, 0.5f));
+		PC->FireAim();
+	}
 
 	TimeOfLastShot = GetWorld()->TimeSeconds;
 }

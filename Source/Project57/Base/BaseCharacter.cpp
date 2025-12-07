@@ -243,6 +243,11 @@ void ABaseCharacter::DoFire(const FVector& ClientHitLocation)
 
 void ABaseCharacter::StartFire()
 {
+	if (!Weapon)
+	{
+		return;
+	}
+
 	bIsFire = true;
 
 	FVector AimOrigin;
