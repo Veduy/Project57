@@ -23,7 +23,6 @@ APlayerController* ALobbyGM::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, co
 void ALobbyGM::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	NET_LOG(TEXT("PostLogin"));
 
 	ALobbyGS* GS = GetGameState<ALobbyGS>();
 	if (GS)

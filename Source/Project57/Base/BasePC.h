@@ -8,6 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRecoilSignature, float, Vertical, float, Horizontal);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHealthUpdateSignature, float, HealthValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRemainingPlayerUpdatedSignature, int32, PlayerCount);
 
 class UInputMappingContext;
 /**
@@ -28,8 +29,11 @@ public:
 
 	FRecoilSignature OnRecoil;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable, BlueprintCallable)
 	FHealthUpdateSignature OnHealthUpdated;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable, BlueprintCallable)
+	FRemainingPlayerUpdatedSignature OnRemainingPlayerUpdated;
 
 public:
 	UFUNCTION()

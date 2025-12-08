@@ -25,6 +25,7 @@
 #include "BasePC.h"
 #include "../InteractActor.h"
 #include "../Network/NetworkUtil.h"
+#include "../InGame/InGameGS.h"
 
 
 // Sets default values
@@ -319,6 +320,15 @@ void ABaseCharacter::DoDeath()
 	//{
 	//	PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
 	//};
+
+	// 서버에서 실행될 로직
+
+	AInGameGS* GS = GetWorld()->GetGameStateChecked<AInGameGS>();
+	if (GS)
+	{		
+		GS->RemainingPlayerCount--;
+	}
+
 	MulticastDeath();
 }
 
