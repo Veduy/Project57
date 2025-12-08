@@ -18,6 +18,9 @@ public:
 	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
+	/** Called when a Controller with a PlayerState leaves the game or is destroyed */
+	virtual void Logout(AController* Exiting) override;
+
 public:
 	UFUNCTION()
 	void CheckLastPlayerLeft();

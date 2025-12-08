@@ -6,5 +6,5 @@
 
 TSharedPtr<ITextDecorator> UItemDecorator::CreateDecorator(URichTextBlock* InOwner)
 {
-	return MakeShareable(new FItemTextDecorator(InOwner));
+	return MakeShareable(new FItemTextDecorator(InOwner , ItemTooltipClass));
 }

@@ -11,7 +11,7 @@ void AInGameGM::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	NET_LOG("");
+	// TODO: Controller가 조종중인 Pawn을 가져와서 CurHP > 0 만을 조건으로 변경하기.
 
 	AInGameGS* GS = GetGameState<AInGameGS>();
 	if (GS)
@@ -28,6 +28,27 @@ void AInGameGM::PostLogin(APlayerController* NewPlayer)
 		GS->RemainingPlayerCount = PlayerCount;
 		GS->OnRep_RemainingPlayerCount();
 	}
+}
+
+void AInGameGM::Logout(AController* Exiting)
+{
+	AInGameGS* GS = GetGameState<AInGameGS>();
+	if (GS)
+	{
+		int32 PlayerCount = 0;
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			if (IsValid(Iterator->Get()))
+			{
+				PlayerCount++;
+			}
+		}
+
+		GS->RemainingPlayerCount = PlayerCount;
+		GS->OnRep_RemainingPlayerCount();
+	}
+
+	Super::Logout(Exiting);
 }
 
 void AInGameGM::CheckLastPlayerLeft()

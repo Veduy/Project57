@@ -13,6 +13,12 @@ FItemTextDecorator::FItemTextDecorator(URichTextBlock* InOwner)
 {
 }
 
+FItemTextDecorator::FItemTextDecorator(URichTextBlock* InOwner, TSubclassOf<UUserWidget> InTooltipWidgetClass)
+    :FRichTextDecorator(InOwner)
+{
+    ToolTipWidgetClass = InTooltipWidgetClass;
+}
+
 bool FItemTextDecorator::Supports(const FTextRunParseResults& RunParseResult, const FString& Text) const
 {
     return RunParseResult.Name == TEXT("Item");

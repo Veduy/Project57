@@ -2,4 +2,3 @@
 
 
 #include "DamageTypeBase.h"
-

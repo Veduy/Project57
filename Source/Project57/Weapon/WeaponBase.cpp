@@ -106,6 +106,7 @@ void AWeaponBase::Fire()
 	if (bFullAuto)
 	{
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
+
 		TempPlayFireSound();
 	}
 }
@@ -170,6 +171,9 @@ void AWeaponBase::ServerStartFire_Implementation(const FVector& HitLocation)
 	MulticastSpawnMuzzleFlash(MuzzleLocation, Dir.Rotation());
 	MulticastPlayFireSound(MuzzleLocation);
 
+	// 서버 전용 PlayFireSound()?? 
+	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, MuzzleLocation);
+
 	TimeOfLastShot = GetWorld()->TimeSeconds;
 }
 
@@ -214,12 +218,15 @@ void AWeaponBase::MulticastSpawnMuzzleFlash_Implementation(const FVector& SpawnL
 
 void AWeaponBase::MulticastPlayFireSound_Implementation(const FVector& SpawnLocation)
 {
-	if (HasAuthority())
+	if (APlayerController* Controller = Cast<APlayerController>(GetOwner()->GetOwner()))
 	{
-		return;
+		NET_LOG(FString::Printf(TEXT("Owner Controller : %s"), *Controller->GetName()));
 	}
 
-	if (FireSound)
+	// 서버는 무조건 있을테니까, 근데 서버이자 클라이언트인 ListenServer에게는 들리게 하는게 맞음.
+	// GetOwner()->GetOwner() != nullptr 
+	// 이렇게하면 서버도 Controller를 가지고있는데, 서버한테 안들릴텐데.
+	if (GetOwner()->GetOwner() == nullptr && FireSound)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), FireSound, SpawnLocation);
 	}
