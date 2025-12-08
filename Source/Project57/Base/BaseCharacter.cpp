@@ -337,7 +337,9 @@ void ABaseCharacter::DoDeath()
 	AInGameGM* GM = Cast<AInGameGM>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (GM)
 	{
-		// 딜레이 넣으면 될듯. 
+		// 타이머 > 
+
+
 		GM->CheckLastPlayerLeft();
 	}
 }

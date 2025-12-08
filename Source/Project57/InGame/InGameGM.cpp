@@ -42,11 +42,19 @@ void AInGameGM::CheckLastPlayerLeft()
 				ABasePC* PC = Cast<ABasePC>(*Iter);
 				if (PC)
 				{
+	
 					//PC->ClientShowLoadingScreen();
 				}
 			}
-
-			GetWorld()->ServerTravel(TEXT("Lobby"));
+			
+			FTimerHandle LodingTimer;
+			GetWorld()->GetTimerManager().SetTimer(LodingTimer, FTimerDelegate::CreateLambda([this]()
+				{
+					GetWorld()->ServerTravel(TEXT("Lobby")); 
+				}),
+				5.f,
+				false,
+				5.f);
 		}
 	}
 }
