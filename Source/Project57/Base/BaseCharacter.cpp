@@ -25,6 +25,8 @@
 #include "BasePC.h"
 #include "../InteractActor.h"
 
+#include "../Network/NetworkUtil.h"
+
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -104,7 +106,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (CurrentHP <= 0)
+	if (CurrentHP <= 0.01)
 	{
 		return DamageAmount;
 	}
@@ -126,7 +128,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		FRadialDamageEvent* Event = (FRadialDamageEvent*)(&DamageEvent);
 		if (Event)
 		{
-			CurrentHP -= DamageAmount;			
+			CurrentHP -= DamageAmount;
 		}
 	}
 	else if (DamageEvent.IsOfType(FDamageEvent::ClassID))
@@ -135,9 +137,10 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		UE_LOG(LogTemp, Warning, TEXT("Damage %f"), DamageAmount);
 	}
 
-	if (CurrentHP <= 0)
+	if (CurrentHP <= 0.01)
 	{
 		DoDeath();
+		NET_LOG("");
 	}
 
 
@@ -306,10 +309,10 @@ void ABaseCharacter::StopIronSight(const FInputActionValue& Value)
 
 void ABaseCharacter::DoDeath()
 {
-	if (DeathMontage)
-	{
-		PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
-	};
+	//if (DeathMontage)
+	//{
+	//	PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
+	//};
 	MulticastDeath();
 }
 
@@ -323,16 +326,21 @@ void ABaseCharacter::MulticastDeath_Implementation()
 
 void ABaseCharacter::DoDeathEnd()
 {
-	GetController()->SetActorEnableCollision(false);
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
+	//GetController()->SetActorEnableCollision(false);
+	//GetMesh()->SetSimulatePhysics(true);
+	//GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
 
 	MulticastDeathEnd();
 }
 
 void ABaseCharacter::MulticastDeathEnd_Implementation()
 {
-	GetController()->SetActorEnableCollision(false);
+	//NET_LOG(FString::Printf(TEXT("Death Controller : %s"), *GetController()->GetName());
+	NET_LOG("");
+	if (AController* DeathController = GetController())
+	{
+		DeathController->SetActorEnableCollision(false);
+	}
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
 }
