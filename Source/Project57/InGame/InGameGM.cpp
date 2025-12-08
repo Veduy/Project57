@@ -5,6 +5,7 @@
 
 #include "InGameGS.h"
 #include "../Network/NetworkUtil.h"
+#include "../Base/BasePC.h"
 
 void AInGameGM::PostLogin(APlayerController* NewPlayer)
 {
@@ -26,5 +27,26 @@ void AInGameGM::PostLogin(APlayerController* NewPlayer)
 
 		GS->RemainingPlayerCount = PlayerCount;
 		GS->OnRep_RemainingPlayerCount();
+	}
+}
+
+void AInGameGM::CheckLastPlayerLeft()
+{
+	AInGameGS* GS = GetGameState<AInGameGS>();
+	if (GS)
+	{
+		if (GS->RemainingPlayerCount <= 1)
+		{
+			for (auto Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
+			{
+				ABasePC* PC = Cast<ABasePC>(*Iter);
+				if (PC)
+				{
+					//PC->ClientShowLoadingScreen();
+				}
+			}
+
+			GetWorld()->ServerTravel(TEXT("Lobby"));
+		}
 	}
 }

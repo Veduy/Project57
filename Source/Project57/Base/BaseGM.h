@@ -16,4 +16,8 @@ class PROJECT57_API ABaseGM : public AGameModeBase
 
 public:
 	ABaseGM();
+
+public:
+
+
 };

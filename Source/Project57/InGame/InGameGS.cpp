@@ -28,5 +28,4 @@ void AInGameGS::OnRep_RemainingPlayerCount()
 	{
 		PC->OnRemainingPlayerUpdated.Broadcast(RemainingPlayerCount);
 	}
-
 }

@@ -26,7 +26,7 @@
 #include "../InteractActor.h"
 #include "../Network/NetworkUtil.h"
 #include "../InGame/InGameGS.h"
-
+#include "../InGame/InGameGM.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -327,9 +327,19 @@ void ABaseCharacter::DoDeath()
 	if (GS)
 	{		
 		GS->RemainingPlayerCount--;
+
+		// 서버를 위해 호출해줘야함.
+		GS->OnRep_RemainingPlayerCount();
 	}
 
 	MulticastDeath();
+
+	AInGameGM* GM = Cast<AInGameGM>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GM)
+	{
+		// 딜레이 넣으면 될듯. 
+		GM->CheckLastPlayerLeft();
+	}
 }
 
 void ABaseCharacter::MulticastDeath_Implementation()
