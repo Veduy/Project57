@@ -7,6 +7,7 @@
 #include "BasePC.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRecoilSignature, float, Vertical, float, Horizontal);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHealthUpdateSignature, float, HealthValue);
 
 class UInputMappingContext;
 /**
@@ -27,9 +28,13 @@ public:
 
 	FRecoilSignature OnRecoil;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	FHealthUpdateSignature OnHealthUpdated;
+
 public:
 	UFUNCTION()
 	void FireAim();
+
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")	
@@ -37,4 +42,11 @@ public:
 
 	float VerticalRecoil;
 	float HorizontalRecoil;
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> MainHUDWidgetClass;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UUserWidget> MainHUDWidget;
 };

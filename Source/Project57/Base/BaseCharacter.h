@@ -86,7 +86,7 @@ public:
 	UFUNCTION()
 	void Reload();
 
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Reliable)
 	void ServerPlayReloadMontage();
 	void ServerPlayReloadMontage_Implementation();
 
@@ -204,9 +204,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_RightLean;
 
+
+	UFUNCTION()
+	void OnRep_CurrentHP();
+
 public:
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentHP, EditAnywhere, BlueprintReadWrite, Category = Character)
 	float CurrentHP = 100;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Character)

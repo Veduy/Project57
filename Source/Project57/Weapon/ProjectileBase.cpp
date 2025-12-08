@@ -72,7 +72,7 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 		//	true);
 	}
 
-	//Destroy();
+	Destroy();
 }
 
 void AProjectileBase::SpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation)

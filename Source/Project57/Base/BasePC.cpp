@@ -5,6 +5,7 @@
 #include "BaseHUD.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "Blueprint/UserWidget.h"
 
 ABasePC::ABasePC()
 {
@@ -25,6 +26,15 @@ void ABasePC::BeginPlay()
 			{
 				InputSystem->AddMappingContext(InputMapping, 0);
 			}
+		}
+	}
+
+	if (IsLocalPlayerController() && MainHUDWidgetClass)
+	{
+		MainHUDWidget = CreateWidget(this, MainHUDWidgetClass, TEXT("MainHUD"));
+		if (MainHUDWidget)
+		{
+			MainHUDWidget->AddToViewport();
 		}
 	}
 }

@@ -24,7 +24,6 @@
 
 #include "BasePC.h"
 #include "../InteractActor.h"
-
 #include "../Network/NetworkUtil.h"
 
 
@@ -55,6 +54,8 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	OnActorBeginOverlap.AddDynamic(this, &ABaseCharacter::ActorBeginOverlap);
+
+
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -121,6 +122,13 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 			CurrentHP -= DamageAmount;
 			//SpawnHitEffect(Event->HitInfo);
 			NetMulticastSpawnHitEffect(Event->HitInfo.ImpactPoint, Event->HitInfo.ImpactNormal.Rotation());
+
+			// PC 가져와서 CurrentHP Call;
+			ABasePC* PC = Cast<ABasePC>(GetOwner());
+			if (PC)
+			{
+				PC->OnHealthUpdated.Broadcast(CurrentHP);
+			}
 		}
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
@@ -140,9 +148,7 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	if (CurrentHP <= 0.01)
 	{
 		DoDeath();
-		NET_LOG("");
 	}
-
 
 	return DamageAmount;
 }
@@ -335,8 +341,9 @@ void ABaseCharacter::DoDeathEnd()
 
 void ABaseCharacter::MulticastDeathEnd_Implementation()
 {
-	//NET_LOG(FString::Printf(TEXT("Death Controller : %s"), *GetController()->GetName());
-	NET_LOG("");
+	//TODO:Replicates - Physics Replication Mode 수정
+
+
 	if (AController* DeathController = GetController())
 	{
 		DeathController->SetActorEnableCollision(false);
@@ -375,6 +382,14 @@ void ABaseCharacter::EatItem(AInteractActor* PickedupItem)
 {
 }
 
+void ABaseCharacter::OnRep_CurrentHP()
+{
+	ABasePC* PC = Cast<ABasePC>(Controller);
+	if (PC)
+	{
+		PC->OnHealthUpdated.Broadcast(CurrentHP);
+	}
+}
 
 void ABaseCharacter::DoHitReact()
 {
