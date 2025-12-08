@@ -117,7 +117,8 @@ float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		if (Event)
 		{
 			CurrentHP -= DamageAmount;
-			SpawnHitEffect(Event->HitInfo);
+			//SpawnHitEffect(Event->HitInfo);
+			NetMulticastSpawnHitEffect(Event->HitInfo.ImpactPoint, Event->HitInfo.ImpactNormal.Rotation());
 		}
 	}
 	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
@@ -186,6 +187,19 @@ void ABaseCharacter::SpawnHitEffect(const FHitResult& Hit)
 	}
 }
 
+void ABaseCharacter::NetMulticastSpawnHitEffect_Implementation(const FVector& HitLocation, const FRotator& HitRotation)
+{
+	if (BloodEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			BloodEffect,
+			HitLocation,
+			HitRotation,
+			FVector(3.f, 3.f, 3.f));
+	}
+}
+
 void ABaseCharacter::SetGenericTeamId(const FGenericTeamId& InTeamID)
 {
 	TeamID = InTeamID;
@@ -216,6 +230,22 @@ void ABaseCharacter::Look(float Pitch, float Yaw)
 }
 
 void ABaseCharacter::Reload()
+{
+	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
+	if (ChildWeapon)
+	{
+		PlayAnimMontage(ChildWeapon->ReloadMontage);
+	}
+
+	ServerPlayReloadMontage();
+}
+
+void ABaseCharacter::ServerPlayReloadMontage_Implementation()
+{
+	MulticastPlayReloadMontage();
+}
+
+void ABaseCharacter::MulticastPlayReloadMontage_Implementation()
 {
 	AWeaponBase* ChildWeapon = Cast<AWeaponBase>(Weapon->GetChildActor());
 	if (ChildWeapon)
@@ -280,6 +310,15 @@ void ABaseCharacter::DoDeath()
 	{
 		PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
 	};
+	MulticastDeath();
+}
+
+void ABaseCharacter::MulticastDeath_Implementation()
+{
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage, 1.f, DeathMonatageSection[FMath::RandRange(0, 5)]);
+	};
 }
 
 void ABaseCharacter::DoDeathEnd()
@@ -287,14 +326,15 @@ void ABaseCharacter::DoDeathEnd()
 	GetController()->SetActorEnableCollision(false);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
+
+	MulticastDeathEnd();
 }
 
-void ABaseCharacter::DoHitReact()
+void ABaseCharacter::MulticastDeathEnd_Implementation()
 {
-	if (HitMontage)
-	{
-		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
-	}
+	GetController()->SetActorEnableCollision(false);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionProfileName(FName("Ragdoll"), true);
 }
 
 FRotator ABaseCharacter::GetAimOffset() const
@@ -325,6 +365,24 @@ void ABaseCharacter::UseItem(AInteractActor* PickedupItem)
 
 void ABaseCharacter::EatItem(AInteractActor* PickedupItem)
 {
+}
+
+
+void ABaseCharacter::DoHitReact()
+{
+	if (HitMontage)
+	{
+		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
+	}
+	MulticastHitReact();
+}
+
+void ABaseCharacter::MulticastHitReact_Implementation()
+{
+	if (HitMontage)
+	{
+		PlayAnimMontage(HitMontage, 1.f, HitMonatageSection[FMath::RandRange(0, 7)]);
+	}
 }
 
 void ABaseCharacter::StartSprint()

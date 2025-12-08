@@ -85,6 +85,15 @@ void AWeaponBase::Fire()
 		return;
 	}
 
+	// Recoil
+	ABasePC* PC = Cast<ABasePC>(Character->GetController());
+	if (PC)
+	{
+		PC->AddPitchInput(FMath::FRandRange(-0.5f, 0.f));
+		PC->AddYawInput(FMath::FRandRange(-0.5f, 0.5f));
+		PC->FireAim();
+	}
+
 	// HitLocation만 어차피 쓸거라 다른건 필요 없을듯.
 	FVector AimOrigin;
 	FVector AimDirection;
@@ -160,17 +169,6 @@ void AWeaponBase::ServerStartFire_Implementation(const FVector& HitLocation)
 
 	MulticastSpawnMuzzleFlash(MuzzleLocation, Dir.Rotation());
 	MulticastPlayFireSound(MuzzleLocation);
-
-	//// Recoil
-	ABaseCharacter* Character = Cast<ABaseCharacter>(GetOwner());
-
-	ABasePC* PC = Cast<ABasePC>(Character->GetController());
-	if (PC)
-	{
-		PC->AddPitchInput(FMath::FRandRange(-0.5f, 0.f));
-		PC->AddYawInput(FMath::FRandRange(-0.5f, 0.5f));
-		PC->FireAim();
-	}
 
 	TimeOfLastShot = GetWorld()->TimeSeconds;
 }

@@ -51,6 +51,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void SpawnHitEffect(const FHitResult& Hit);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastSpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation);
+	void NetMulticastSpawnHitEffect_Implementation(const FVector& HitLocation, const FRotator& HitRotation);
+	
+
 	virtual void SetGenericTeamId(const FGenericTeamId& InTeamID) override;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
@@ -78,8 +83,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Look(float Pitch, float Yaw);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void Reload();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerPlayReloadMontage();
+	void ServerPlayReloadMontage_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayReloadMontage();
+	void MulticastPlayReloadMontage_Implementation();
 	
 	// Notify Execute
 	UFUNCTION(BlueprintCallable)
@@ -108,11 +121,23 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DoDeath();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastDeath();
+	void MulticastDeath_Implementation();
+
 	UFUNCTION(BlueprintCallable)
 	void DoDeathEnd();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastDeathEnd();
+	void MulticastDeathEnd_Implementation();
+
 	UFUNCTION()
 	void DoHitReact();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastHitReact();
+	void MulticastHitReact_Implementation();
 
 	UFUNCTION()
 	void StartSprint();

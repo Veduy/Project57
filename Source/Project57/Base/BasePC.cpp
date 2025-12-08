@@ -23,7 +23,7 @@ void ABasePC::BeginPlay()
 		{
 			if (InputMapping)
 			{
-				InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
+				InputSystem->AddMappingContext(InputMapping, 0);
 			}
 		}
 	}

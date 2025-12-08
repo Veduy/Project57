@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "DamageTypeBase.h"
 
+#include "../Network/NetworkUtil.h"
+
 // Sets default values
 AProjectileBase::AProjectileBase()
 {
@@ -47,13 +49,13 @@ void AProjectileBase::BeginPlay()
 void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	SpawnHitEffect(Hit);
-
-	if (GetOwner())
+	if (!HasAuthority())
 	{
 		//서버가 아니면 총알의 주인이 없다.
 		return;
 	}
+
+	SpawnHitEffect(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 
 	if (APawn* Pawn = Cast<APawn>(GetOwner()->GetOwner()))
 	{
@@ -72,15 +74,15 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 	//Destroy();
 }
 
-void AProjectileBase::SpawnHitEffect(const FHitResult& Hit)
+void AProjectileBase::SpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation)
 {
 	if (Decal)
 	{
 		UDecalComponent* MadeDecal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(),
 			Decal,
 			FVector(5, 5, 5),
-			Hit.ImpactPoint,
-			Hit.ImpactNormal.Rotation(),
+			HitLocation,
+			HitRotation,
 			5.f);
 
 		MadeDecal->SetFadeScreenSize(0.f);

@@ -33,7 +33,7 @@ public:
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")	
-	TSoftObjectPtr<UInputMappingContext> InputMapping;
+	TObjectPtr<UInputMappingContext> InputMapping;
 
 	float VerticalRecoil;
 	float HorizontalRecoil;

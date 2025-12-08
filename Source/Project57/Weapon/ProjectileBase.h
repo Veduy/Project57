@@ -25,8 +25,8 @@ public:
 	UFUNCTION()
 	void ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-	virtual void SpawnHitEffect(const FHitResult& Hit);
+	
+	void SpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation);
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
