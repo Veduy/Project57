@@ -55,7 +55,8 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 		return;
 	}
 
-	SpawnHitEffect(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+	//SpawnHitEffect(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+	MulticastSpawnHitEffect(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 
 	if (APawn* Pawn = Cast<APawn>(GetOwner()->GetOwner()))
 	{
@@ -75,6 +76,21 @@ void AProjectileBase::ComponentHit(UPrimitiveComponent* HitCompoennt, AActor* Ot
 }
 
 void AProjectileBase::SpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation)
+{
+	if (Decal)
+	{
+		UDecalComponent* MadeDecal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(),
+			Decal,
+			FVector(5, 5, 5),
+			HitLocation,
+			HitRotation,
+			5.f);
+
+		MadeDecal->SetFadeScreenSize(0.f);
+	}
+}
+
+void AProjectileBase::MulticastSpawnHitEffect_Implementation(const FVector& HitLocation, const FRotator& HitRotation)
 {
 	if (Decal)
 	{

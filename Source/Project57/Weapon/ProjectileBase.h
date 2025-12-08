@@ -27,6 +27,10 @@ public:
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	
 	void SpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastSpawnHitEffect(const FVector& HitLocation, const FRotator& HitRotation);
+	void MulticastSpawnHitEffect_Implementation(const FVector& HitLocation, const FRotator& HitRotation);
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
