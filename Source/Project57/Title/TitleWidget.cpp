@@ -17,6 +17,8 @@ void UTitleWidget::NativeConstruct()
 	ServerIP = Cast<UEditableTextBox>(GetWidgetFromName(TEXT("ServerIP")));
 
 	StartServerButton->OnClicked.AddDynamic(this, &UTitleWidget::StartServer);
+	StartGameButton->OnClicked.AddDynamic(this, &UTitleWidget::StartGame);
+
 	ConnectButton->OnClicked.AddDynamic(this, &UTitleWidget::Connect);
 }
 
@@ -24,6 +26,12 @@ void UTitleWidget::StartServer()
 {
 	SaveData();
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("Lobby"), true, TEXT("listen"));
+}
+
+void UTitleWidget::StartGame()
+{
+	SaveData();
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("Session"));
 }
 
 void UTitleWidget::Connect()

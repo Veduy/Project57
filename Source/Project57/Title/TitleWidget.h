@@ -26,6 +26,9 @@ public:
 	void StartServer();
 
 	UFUNCTION()
+	void StartGame();
+
+	UFUNCTION()
 	void Connect();
 
 	UFUNCTION()
@@ -33,6 +36,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta=(WidgetBind))
 	TObjectPtr<UButton> StartServerButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = (WidgetBind))
+	TObjectPtr<UButton> StartGameButton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta=(WidgetBind))
 	TObjectPtr<UButton> ConnectButton;

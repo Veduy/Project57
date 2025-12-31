@@ -41,6 +41,10 @@ public:
 	UFUNCTION()
 	void Fire();
 
+	UFUNCTION(Server, Reliable)
+	void ServerFire();
+	void ServerFire_Implementation();
+
 	UFUNCTION()
 	void TempPlayFireSound();
 

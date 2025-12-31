@@ -20,6 +20,7 @@
 #include "../Weapon/ProjectileBase.h"
 
 #include "../Network/NetworkUtil.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AWeaponBase::AWeaponBase()
@@ -94,21 +95,32 @@ void AWeaponBase::Fire()
 		PC->FireAim();
 	}
 
+	ServerFire();
+
 	// HitLocation만 어차피 쓸거라 다른건 필요 없을듯.
-	FVector AimOrigin;
+	/*FVector AimOrigin;
 	FVector AimDirection;
 	FVector HitLocation;
 	if (GetAimData(AimOrigin, AimDirection, HitLocation))
 	{
 		ServerStartFire(HitLocation);
-	}
+	}*/
 
-	if (bFullAuto)
-	{
-		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
+	//if (bFullAuto)
+	//{
+	//	GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
 
-		TempPlayFireSound();
-	}
+	//	TempPlayFireSound();
+	//}
+}
+
+void AWeaponBase::ServerFire_Implementation()
+{
+	FVector AimOrigin;
+	FVector AimDirection;
+	FVector HitLocation;
+	GetAimData(AimOrigin, AimDirection, HitLocation);
+	ServerStartFire(HitLocation);
 }
 
 void AWeaponBase::TempPlayFireSound()
@@ -131,6 +143,13 @@ void AWeaponBase::ServerStartFire_Implementation(const FVector& HitLocation)
 	if (CurrentTimeOfShoot < FireRate)
 	{
 		return;
+	}
+
+	if (bFullAuto)
+	{
+		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &AWeaponBase::Fire, FireRate, false);
+
+		TempPlayFireSound();
 	}
 
 	FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
@@ -234,31 +253,33 @@ void AWeaponBase::MulticastPlayFireSound_Implementation(const FVector& SpawnLoca
 
 bool AWeaponBase::GetAimData(FVector& OutAimLocation, FVector& OutAimDirection, FVector& OutHitLocation)
 {
-	ABasePC* PC = Cast<ABasePC>(UGameplayStatics::GetPlayerController(this, 0));
-	if (!PC)
-	{
-		return false;
-	}
+	//ABasePC* PC = Cast<ABasePC>(UGameplayStatics::GetPlayerController(this, 0));
+	//if (!PC)
+	//{
+	//	return false;
+	//}
 
-	int32 SizeX;
-	int32 SizeY;
-	PC->GetViewportSize(SizeX, SizeY);
-	int32 CenterX = SizeX * 0.5f;
-	int32 CenterY = SizeY * 0.5f;
+	//int32 SizeX;
+	//int32 SizeY;
+	//PC->GetViewportSize(SizeX, SizeY);
+	//int32 CenterX = SizeX * 0.5f;
+	//int32 CenterY = SizeY * 0.5f;
 
-	FVector WorldLocation;
-	FVector WorldDirection;
-	PC->DeprojectScreenPositionToWorld(CenterX, CenterY, WorldLocation, WorldDirection);
+	//FVector WorldLocation;
+	//FVector WorldDirection;
+	//PC->DeprojectScreenPositionToWorld(CenterX, CenterY, WorldLocation, WorldDirection);
 
-	OutAimLocation = WorldLocation;
-	OutAimDirection = WorldDirection;
+	//OutAimLocation = WorldLocation;
+	//OutAimDirection = WorldDirection;
 
-	FVector CameraLocation;
-	FRotator CameraRotation;
-	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	//FVector CameraLocation;
+	//FRotator CameraRotation;
+	//PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-	FVector TraceStart = CameraLocation;
-	FVector TraceEnd = CameraLocation + OutAimDirection * 1000.f;
+	//// 카메라 기준으로 계산 로직 수정
+	FVector TraceStart = Cast<ABaseCharacter>(GetOwner())->Camera->GetComponentLocation();
+	//FVector TraceEnd = TraceStart + OutAimDirection * 1000.f;
+	FVector TraceEnd = Cast<ABaseCharacter>(GetOwner())->Camera->GetForwardVector() * 1000.f;
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
