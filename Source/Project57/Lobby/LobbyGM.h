@@ -27,7 +27,9 @@ public:
 	virtual void StartPlay() override;
 
 public:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void StartGame();
+	virtual void StartGame_Implementation();
 
 public:
 	FTimerHandle LeftTimerHandle;

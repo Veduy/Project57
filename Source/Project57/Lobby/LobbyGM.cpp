@@ -72,7 +72,7 @@ void ALobbyGM::StartPlay()
 	Super::StartPlay();
 }
 
-void ALobbyGM::StartGame()
+void ALobbyGM::StartGame_Implementation()
 {
 	GetWorld()->GetTimerManager().ClearTimer(LeftTimerHandle);
 
