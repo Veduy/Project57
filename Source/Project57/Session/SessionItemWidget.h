@@ -17,7 +17,7 @@ UCLASS()
 class PROJECT57_API USessionItemWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual bool Initialize() override;
 
@@ -39,9 +39,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UButton> Btn_Join;
-	
+
 public:
 	UPROPERTY(BlueprintReadOnly)
 	FBlueprintSessionResult Result;
-	
 };
